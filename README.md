@@ -45,8 +45,8 @@
 
 ## 📷 Screenshots
 
-![PackPal Desktop UI](https://via.placeholder.com/800x400.png?text=Add+Screenshot)
-![PackPal Mobile UI](https://via.placeholder.com/400x800.png?text=Add+Screenshot)
+![PackPal Desktop UI](https://github.com/Divyajeet7978/Portfolio_Redesigned/blob/main/img/PPD.png)
+![PackPal Mobile UI](https://github.com/Divyajeet7978/Portfolio_Redesigned/blob/main/img/PPM.png)
 
 ## 🧠 AI Assistant Capabilities
 
