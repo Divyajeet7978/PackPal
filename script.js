@@ -373,16 +373,61 @@ document.addEventListener('DOMContentLoaded', () => {
             const listText = STATE.packedItems.map(i => `- ${i.name} (x${i.quantity}) - ${ (i.weight * i.quantity).toFixed(1)}kg`).join('\n');
             const totalWeight = STATE.packedItems.reduce((sum, item) => sum + (item.weight * item.quantity), 0);
             const fullText = `Packing List for ${STATE.tripDetails.destination}\nTotal Weight: ${totalWeight.toFixed(1)}kg\n\n${listText}`;
+            
             if (type === 'text') {
                 navigator.clipboard.writeText(fullText).then(() => alert('Copied to clipboard!'));
             } else if (type === 'image') {
-                const listContainer = document.querySelector('.main-content .panel');
-                html2canvas(listContainer).then(canvas => {
+                // --- MODIFICATION START ---
+                // 1. Create a temporary container for a clean export layout
+                const tempExportContainer = document.createElement('div');
+                const bodyStyles = window.getComputedStyle(document.body);
+                tempExportContainer.style.position = 'absolute';
+                tempExportContainer.style.left = '-9999px'; // Position off-screen
+                tempExportContainer.style.width = '700px'; // A good width for the image
+                tempExportContainer.style.padding = '25px';
+                tempExportContainer.style.border = '1px solid var(--border-light)';
+                tempExportContainer.style.borderRadius = '15px';
+                tempExportContainer.style.background = bodyStyles.getPropertyValue('--card-bg-light');
+                tempExportContainer.style.color = bodyStyles.getPropertyValue('--text-light');
+                tempExportContainer.style.fontFamily = bodyStyles.getPropertyValue('font-family');
+                
+                // 2. Build the HTML content for the container
+                let content = `<h2 style="color: ${bodyStyles.getPropertyValue('--primary-color')}; margin:0 0 20px 0; border-bottom: 2px solid ${bodyStyles.getPropertyValue('--primary-color')}; padding-bottom: 10px;">Packed List for ${STATE.tripDetails.destination || 'Your Trip'}</h2><ul style="list-style: none; padding: 0; margin: 0;">`;
+                
+                if (STATE.packedItems.length > 0) {
+                    STATE.packedItems.forEach(item => {
+                        const category = STATE.categories.find(c => c.id === item.category)?.name || 'Other';
+                        content += `
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid ${bodyStyles.getPropertyValue('--border-light')};">
+                                <span style="font-size: 16px;">${item.name} (x${item.quantity}) <em style="color: ${bodyStyles.getPropertyValue('--subtle-text-light')}; font-size: 14px;">&mdash; ${category}</em></span>
+                                <span style="font-weight: 600; font-size: 16px;">${(item.weight * item.quantity).toFixed(1)} kg</span>
+                            </li>
+                        `;
+                    });
+                } else {
+                    content += '<li>No items packed yet!</li>';
+                }
+                
+                content += `</ul><h3 style="text-align: right; margin: 20px 0 0 0; font-size: 18px;">Total Weight: ${totalWeight.toFixed(1)} kg</h3>`;
+                tempExportContainer.innerHTML = content;
+                
+                // 3. Append to body to be rendered by html2canvas
+                document.body.appendChild(tempExportContainer);
+                
+                // 4. Run html2canvas on the new, temporary element
+                html2canvas(tempExportContainer, {
+                    // Use the computed background color to avoid transparency issues
+                    backgroundColor: bodyStyles.getPropertyValue('--card-bg-light')
+                }).then(canvas => {
                     const link = document.createElement('a');
-                    link.download = `PackPal-${STATE.tripDetails.destination}.png`;
+                    link.download = `PackPal-Packed-${STATE.tripDetails.destination || 'List'}.png`;
                     link.href = canvas.toDataURL();
                     link.click();
+
+                    // 5. Clean up by removing the temporary element from the DOM
+                    document.body.removeChild(tempExportContainer);
                 });
+                // --- MODIFICATION END ---
             }
         },
         async exportStyledPDF() {
@@ -541,4 +586,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 6. INITIALIZE APP ---
     APP.init();
 });
-
