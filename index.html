@@ -4,774 +4,278 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PackPal - Smart Travel Packing Assistant</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+
     <style>
+        /* --- TABLE OF CONTENTS ---
+        1.  Root Variables & Theming
+        2.  Global Styles & Resets
+        3.  Layout & Container
+        4.  Header & Logo
+        5.  Main Layout (Sidebar & Main Content)
+        6.  Panels & Cards
+        7.  Forms, Inputs & Buttons (including Searchable Dropdown)
+        8.  Item Cards & Packing List (with Swipe Styles)
+        9.  Widgets (Weight, Categories, Travel Info, Suitcase Animation)
+        10. Modals & Notifications
+        11. Mobile Navigation
+        12. Helper & Animation Classes
+        13. Media Queries (Responsive Design)
+        --------------------------- */
+
+        /* --- 1. Root Variables & Theming --- */
         :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --accent: #4895ef;
-            --danger: #f72585;
-            --warning: #f77f00;
-            --success: #4cc9f0;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --glass: rgba(255, 255, 255, 0.2);
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --danger-color: #f72585;
+            --warning-color: #f7b801;
+            --success-color: #4cc9f0;
+            --skip-color: #ff4d6d;
+            --pack-color: #80ed99;
+            --light-bg: #f4f7f9;
+            --dark-bg: #0d1117;
+            --text-light: #212529;
+            --text-dark: #e0e0e0;
+            --subtle-text-light: #6c757d;
+            --subtle-text-dark: #8b949e;
+            --card-bg-light: #ffffff;
+            --card-bg-dark: #161b22;
+            --border-light: #e1e4e8;
+            --border-dark: #30363d;
+            --shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+            --transition-speed: 0.3s;
         }
 
         [data-theme="dark"] {
-            --primary: #4895ef;
-            --secondary: #4361ee;
-            --accent: #3f37c9;
-            --light: #212529;
-            --dark: #f8f9fa;
-            --glass: rgba(0, 0, 0, 0.2);
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --primary-color: #4895ef;
+            --secondary-color: #4361ee;
+            --accent-color: #3f37c9;
+            --light-bg: #0d1117;
+            --dark-bg: #f4f7f9;
+            --text-light: #e0e0e0;
+            --text-dark: #212529;
+            --subtle-text-light: #8b949e;
+            --subtle-text-dark: #6c757d;
+            --card-bg-light: #161b22;
+            --card-bg-dark: #ffffff;
+            --border-light: #30363d;
+            --border-dark: #e1e4e8;
+            --shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.2);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
+        /* --- 2. Global Styles & Resets --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background-color: var(--light);
-            color: var(--dark);
-            transition: var(--transition);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-light);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
             min-height: 100vh;
             padding: 20px;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        /* --- 3. Layout & Container --- */
+        .container { max-width: 1200px; margin: 0 auto; }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
+        /* --- 4. Header & Logo --- */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .logo { font-size: 1.75rem; font-weight: bold; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+        .header-actions { display: flex; gap: 15px; }
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        /* --- 5. Main Layout --- */
+        .main-layout { display: grid; grid-template-columns: 360px 1fr; gap: 20px; }
+        .main-content, .sidebar {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: panel-in 0.5s ease-out forwards;
         }
+        .main-content { animation-delay: 0.2s; }
 
-        .logo i {
-            font-size: 28px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .theme-toggle, .share-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .share-btn {
-            font-size: 16px;
-            padding: 5px 10px;
-            border-radius: 8px;
-            background-color: var(--glass);
-        }
-
-        .main-layout {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
-            
-            .header-actions .theme-toggle {
-                display: flex !important;
-            }
-        }
-
+        /* --- 6. Panels & Cards --- */
         .panel {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
+            background: var(--card-bg-light);
             border-radius: 15px;
             padding: 20px;
             box-shadow: var(--shadow);
             margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-light);
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), transform var(--transition-speed);
         }
-
-        .panel-title {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
+        .panel:hover { transform: translateY(-3px); }
+        .panel-title { font-size: 1.1rem; margin-bottom: 20px; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+        
+        /* --- 7. Forms, Inputs & Buttons --- */
+        .form-group { margin-bottom: 15px; position: relative; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
         input, select {
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid var(--gray);
-            background-color: var(--light);
-            color: var(--dark);
-            transition: var(--transition);
+            border: 1px solid var(--border-light);
+            background-color: var(--light-bg);
+            color: var(--text-light);
+            transition: all var(--transition-speed);
         }
-
-        [data-theme="dark"] input, 
-        [data-theme="dark"] select {
-            background-color: var(--dark);
-            color: var(--light);
-            border-color: var(--gray);
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 25%, transparent);
         }
-
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         button {
-            background-color: var(--primary);
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 12px 18px;
             border-radius: 8px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all var(--transition-speed);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        button:hover { background-color: var(--secondary-color); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-outline { background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
+        #generateBtn { animation: pulse-glow 2s infinite; }
+        
+        /* Searchable Dropdown */
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card-bg-light);
+            border: 1px solid var(--border-light);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .autocomplete-item:hover {
+            background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
         }
 
-        button:hover {
-            background-color: var(--secondary);
-            transform: translateY(-2px);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-small {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-
-        .progress-container {
-            margin: 20px 0;
-        }
-
-        .progress-bar {
-            height: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 5px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: var(--success);
-            transition: width 0.5s ease;
-        }
-
-        .progress-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-        }
-
-        .weight-display {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin: 20px 0;
-        }
-
+        /* --- 8. Item Cards & Packing List --- */
         .item-card {
-            background: var(--light);
+            background: var(--card-bg-light);
             border-radius: 12px;
             padding: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             box-shadow: var(--shadow);
             display: flex;
             align-items: center;
             gap: 15px;
-            cursor: grab;
             user-select: none;
-            transition: var(--transition);
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
             position: relative;
-            overflow: hidden;
+            border: 1px solid var(--border-light);
+            touch-action: none; /* Important for swipe gestures */
         }
-
-        .item-card:active {
-            cursor: grabbing;
-        }
-
-        .item-icon {
-            font-size: 24px;
-            color: var(--primary);
-            min-width: 30px;
+        .item-card.dragging { cursor: grabbing; transition: none; }
+        .item-card.swipe-right { transform: translateX(150%) rotate(15deg); opacity: 0; }
+        .item-card.swipe-left { transform: translateX(-150%) rotate(-15deg); opacity: 0; }
+        .item-card.swiping-right { background-color: color-mix(in srgb, var(--pack-color) 20%, transparent); }
+        .item-card.swiping-left { background-color: color-mix(in srgb, var(--skip-color) 20%, transparent); }
+        .item-icon { font-size: 24px; color: var(--primary-color); min-width: 30px; text-align: center; }
+        .item-details { flex-grow: 1; }
+        .item-name { font-weight: 600; }
+        .item-meta { display: flex; gap: 10px; font-size: 12px; color: var(--subtle-text-light); font-weight: 500; }
+        .item-category { background-color: var(--accent-color); color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+        .swipe-hint {
             text-align: center;
-        }
-
-        .item-details {
-            flex-grow: 1;
-        }
-
-        .item-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .item-meta {
-            display: flex;
-            gap: 10px;
             font-size: 12px;
-            color: var(--gray);
-        }
-
-        .item-category {
-            background-color: var(--accent);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-        }
-
-        .item-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .pack-btn {
-            background-color: var(--success);
-        }
-
-        .skip-btn {
-            background-color: var(--danger);
-        }
-
-        .undo-btn {
-            background-color: var(--warning);
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-        }
-
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .category-card {
-            background: var(--glass);
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .category-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .category-icon {
-            font-size: 24px;
-            margin-bottom: 5px;
-            color: var(--primary);
-        }
-
-        .category-name {
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-
-        .category-count {
-            font-size: 10px;
-            color: var(--gray);
-        }
-
-        .packed-items {
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .packed-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .travel-info {
-            margin-top: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .weather-widget {
-            background: var(--glass);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-
-        .weather-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .weather-icon {
-            font-size: 24px;
-        }
-
-        .weather-temp {
-            font-weight: bold;
-        }
-
-        .weather-recommendations p {
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        .currency-widget {
-            background: var(--glass);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-
-        .currency-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .currency-icon {
-            font-size: 24px;
-        }
-
-        .currency-rate {
-            font-weight: bold;
-        }
-
-        .currency-info {
-            font-size: 14px;
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .modal-content {
-            background-color: var(--light);
-            padding: 20px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--dark);
-        }
-
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 400px;
-        }
-
-        .chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
+            color: #999;
             margin-bottom: 15px;
-            padding-right: 10px;
+            animation: shimmer 3s infinite;
         }
-
-        .ai-message {
-            background-color: var(--glass);
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-
-        .ai-response {
-            background-color: var(--primary);
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-
-        .quick-questions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .quick-question {
-            background-color: var(--glass);
-            border: none;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .quick-question:hover {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        .chat-input {
-            display: flex;
-            gap: 10px;
-        }
-
-        .chat-input input {
-            flex-grow: 1;
-        }
-
-        .mobile-nav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--light);
-            padding: 10px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-        }
-
-        .nav-buttons {
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .nav-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 12px;
-            color: var(--dark);
-            text-decoration: none;
-        }
-
-        .nav-btn i {
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        @media (max-width: 768px) {
-            .mobile-nav {
-                display: block;
-            }
-            
-            .header-actions .share-btn {
-                display: none;
-            }
-            
-            .header-actions .theme-toggle {
-                display: none;
-            }
-            
-            body {
-                padding-bottom: 70px;
-            }
-            
-            .panel {
-                padding: 15px;
-            }
-            
-            .categories-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            }
-            
-            .item-card {
-                padding: 12px;
-                gap: 10px;
-            }
-            
-            .item-actions {
-                flex-direction: column;
-            }
-        }
-
-        /* Swipe animations */
-        .swipe-right {
-            transform: translateX(100px) rotate(10deg);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .swipe-left {
-            transform: translateX(-100px) rotate(-10deg);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        /* Drag hint */
-        .drag-hint {
-            text-align: center;
-            font-size: 12px;
-            color: var(--gray);
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 576px) {
-            body {
-                padding: 10px;
-                padding-bottom: 70px;
-            }
-            
-            .panel {
-                padding: 12px;
-            }
-            
-            .categories-grid {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            }
-            
-            .item-card {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .item-actions {
-                flex-direction: row;
-                margin-top: 10px;
-            }
-            
-            .item-meta {
-                justify-content: center;
-            }
-        }
-
-        /* Accessibility focus styles */
-        button:focus, input:focus, select:focus {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        /* Animation classes */
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        .bounce {
-            animation: bounce 0.5s ease infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .pulse {
-            animation: pulse 2s ease infinite;
-        }
-
-        /* Autocomplete styles */
-        .autocomplete {
-            position: relative;
-        }
-
-        .autocomplete-items {
-            position: absolute;
-            border: 1px solid var(--gray);
-            border-bottom: none;
-            border-top: none;
-            z-index: 99;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background-color: var(--light);
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .autocomplete-items div {
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--gray);
-        }
-
-        .autocomplete-items div:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        /* Undo notification */
-        .undo-notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--warning);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .undo-notification.show {
-            opacity: 1;
-        }
-
-        .undo-notification button {
-            background: none;
-            border: none;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
+        .quantity-controls { display: flex; align-items: center; gap: 10px; }
+        .quantity-btn {
+            background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+            color: var(--primary-color);
+            width: 28px;
+            height: 28px;
             padding: 0;
-        }
-
-        /* Visual export styles */
-        .visual-export {
-            background: var(--light);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        .export-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--gray);
-        }
-
-        .export-title {
-            font-size: 18px;
-            color: var(--primary);
-        }
-
-        .export-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--primary);
+            border-radius: 50%;
             font-weight: bold;
         }
+        .quantity-display { font-weight: bold; min-width: 15px; text-align: center; }
 
-        .export-section {
-            margin-bottom: 15px;
+        /* --- 9. Widgets --- */
+        .suitcase-widget { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        #suitcase-svg { width: 100px; height: auto; transition: transform 0.2s ease; }
+        #suitcase-svg.full { animation: suitcase-jiggle 0.5s; }
+        #suitcase-fill { fill: var(--suitcase-fill-color, var(--primary-color)); transition: transform 0.5s ease-out, fill 0.5s ease; transform-origin: bottom; transform: scaleY(0); }
+        .weight-display { font-size: 1.2rem; font-weight: bold; text-align: center; }
+        .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 20px; }
+        .category-card { background: color-mix(in srgb, var(--primary-color) 10%, transparent); border-radius: 10px; padding: 10px; text-align: center; transition: var(--transition-speed); }
+        .category-card:hover { transform: translateY(-5px); background-color: color-mix(in srgb, var(--primary-color) 20%, transparent); }
+        .category-icon { font-size: 24px; margin-bottom: 5px; color: var(--primary-color); }
+        .category-count { font-weight: bold; font-size: 1rem; transition: color 0.3s; }
+        .category-count.updated { animation: count-flip 0.5s; }
+        .packed-items { margin-top: 20px; max-height: 200px; overflow-y: auto; padding-right: 5px; }
+        .packed-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-light); }
+        .info-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px; }
+        .info-item i { color: var(--accent-color); font-size: 1.1rem; margin-top: 2px; }
+        .info-item-content h4 { margin-bottom: 5px; font-size: 1rem; }
+        .info-item-content p { font-size: 0.9rem; line-height: 1.5; color: var(--subtle-text-light); }
+        .currency-widget { border-top: 1px solid var(--border-light); margin-top: 15px; padding-top: 15px; }
+        .currency-widget p { font-weight: 500; }
+        .currency-widget ul { list-style: none; padding-left: 0; font-size: 0.9rem; color: var(--subtle-text-light); font-weight: 500; }
+
+        /* --- 10. Modals & Notifications --- */
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal.active { opacity: 1; pointer-events: all; }
+        .modal-content { background-color: var(--card-bg-light); padding: 25px; border-radius: 15px; max-width: 500px; width: 90%; box-shadow: var(--shadow); transform: scale(0.95) translateY(10px); transition: transform 0.3s ease, opacity 0.3s ease; }
+        .modal.active .modal-content { transform: scale(1) translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light); }
+        .undo-notification { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(150%); background-color: var(--warning-color); color: #000; padding: 10px 20px; border-radius: 20px; display: flex; align-items: center; gap: 10px; z-index: 1000; transition: transform 0.3s ease; }
+        .undo-notification.show { transform: translateX(-50%) translateY(0); }
+        .undo-notification button { background: none; border: none; color: #000; font-weight: bold; cursor: pointer; }
+
+        /* --- 11. Mobile Navigation --- */
+        .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--card-bg-light); padding: 10px; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); z-index: 100; border-top: 1px solid var(--border-light); }
+        .nav-buttons { display: flex; justify-content: space-around; }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: var(--text-light); text-decoration: none; }
+        .nav-btn i { font-size: 18px; margin-bottom: 5px; }
+
+        /* --- 12. Helper & Animation Classes --- */
+        .hidden { display: none !important; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .spinner { border: 2px solid #f3f3f3; border-top: 2px solid var(--primary-color); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+        .loading-message { display: flex; align-items: center; justify-content: center; gap: 10px; font-style: italic; color: #999; padding: 2rem; }
+        @keyframes card-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .item-card-enter { animation: card-in 0.4s ease-out backwards; }
+        @keyframes panel-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-glow { 0% { box-shadow: 0 0 5px color-mix(in srgb, var(--primary-color) 50%, transparent); } 50% { box-shadow: 0 0 20px color-mix(in srgb, var(--primary-color) 70%, transparent); } 100% { box-shadow: 0 0 5px color-mix(in srgb, var(--primary-color) 50%, transparent); } }
+        @keyframes shimmer { 0% { background-position: -500px 0; } 100% { background-position: 500px 0; } }
+        .swipe-hint { background: linear-gradient(to right, #999 40%, #fff 50%, #999 60%); background-size: 1000px 100%; color: transparent; -webkit-background-clip: text; background-clip: text; }
+        @keyframes count-flip { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: rotateX(0deg); opacity: 1; } }
+        @keyframes suitcase-jiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(3deg); } 75% { transform: rotate(-3deg); } }
+
+        /* --- 13. Media Queries --- */
+        @media (max-width: 992px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .sidebar { order: 2; }
+            .main-content { order: 1; }
         }
-
-        .export-section-title {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: var(--primary);
-        }
-
-        .export-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px dashed var(--gray);
+        @media (max-width: 768px) {
+            body { padding-bottom: 80px; }
+            .mobile-nav { display: block; }
+            .header-actions { display: none; }
         }
     </style>
 </head>
@@ -779,1618 +283,692 @@
     <div class="container">
         <header>
             <div class="logo">
-                <i class="fas fa-suitcase"></i>
+                <i class="fas fa-suitcase-rolling"></i>
                 <span>PackPal</span>
             </div>
             <div class="header-actions">
-                <button class="share-btn" id="shareBtn">
-                    <i class="fas fa-share-alt"></i>
-                    <span>Share</span>
-                </button>
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
+                <button class="share-btn btn-outline" id="shareBtn"><i class="fas fa-share-alt"></i> Share</button>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
         </header>
 
         <div class="main-layout">
             <div class="sidebar">
+                <!-- Trip Details Panel -->
                 <div class="panel">
-                    <h2 class="panel-title"><i class="fas fa-plane"></i> Trip Details</h2>
-                    <div class="form-group autocomplete">
+                    <h2 class="panel-title"><i class="fas fa-plane-departure"></i> Trip Details</h2>
+                    <div class="form-group">
                         <label for="destination">Destination</label>
-                        <input type="text" id="destination" placeholder="Where are you going?">
-                        <div class="autocomplete-items" id="autocompleteList"></div>
+                        <input type="text" id="destination" placeholder="Search for a country...">
+                        <div class="autocomplete-results hidden" id="destination-results"></div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="duration">Duration (days)</label>
+                            <input type="number" id="duration" min="1" value="7">
+                        </div>
+                        <div class="form-group">
+                            <label for="season">Season</label>
+                            <select id="season">
+                                <option value="Summer">Summer</option>
+                                <option value="Winter">Winter</option>
+                                <option value="Spring/Fall">Spring/Fall</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="duration">Trip Duration (days)</label>
-                        <input type="number" id="duration" min="1" value="7">
+                        <label for="activities">Primary Activity</label>
+                        <input type="text" id="activities" placeholder="e.g., Sightseeing, Food tour">
                     </div>
-                    <div class="form-group">
-                        <label for="travelers">Travelers</label>
-                        <input type="number" id="travelers" min="1" value="1">
+                    <div class="form-grid">
+                         <div class="form-group">
+                            <label for="travelers">Travelers</label>
+                            <input type="number" id="travelers" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="class">Class</label>
+                            <select id="class">
+                                <option value="economy">Economy</option>
+                                <option value="business">Business</option>
+                                <option value="first">First</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="airline">Airline</label>
                         <select id="airline">
-                            <option value="">Select Airline</option>
-                            <option value="delta">Delta Airlines</option>
-                            <option value="united">United Airlines</option>
-                            <option value="american">American Airlines</option>
-                            <option value="southwest">Southwest Airlines</option>
+                            <option value="default">Default (23kg)</option>
                             <option value="emirates">Emirates</option>
                             <option value="qatar">Qatar Airways</option>
-                            <option value="lufthansa">Lufthansa</option>
-                            <option value="british">British Airways</option>
-                            <option value="airfrance">Air France</option>
                             <option value="singapore">Singapore Airlines</option>
-                            <option value="qantas">Qantas</option>
-                            <option value="aircanada">Air Canada</option>
-                            <option value="ana">ANA</option>
-                            <option value="jal">Japan Airlines</option>
-                            <option value="cathay">Cathay Pacific</option>
-                            <option value="airchina">Air China</option>
-                            <option value="indigo">IndiGo</option>
-                            <option value="airasia">AirAsia</option>
+                            <option value="delta">Delta</option>
+                            <option value="united">United</option>
+                            <option value="lufthansa">Lufthansa</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="class">Class</label>
-                        <select id="class">
-                            <option value="economy">Economy</option>
-                            <option value="premium">Premium Economy</option>
-                            <option value="business">Business</option>
-                            <option value="first">First Class</option>
-                        </select>
-                    </div>
-                    <button id="generateBtn">Generate Packing List</button>
+                    <button id="generateBtn" style="width: 100%;">Generate Packing List</button>
                 </div>
 
+                <!-- Suitcase Status Panel -->
                 <div class="panel">
-                    <h2 class="panel-title"><i class="fas fa-suitcase"></i> Suitcase Status</h2>
-                    <div class="weight-display">
-                        <span id="currentWeight">0</span> / <span id="maxWeight">23</span> kg
+                    <h2 class="panel-title"><i class="fas fa-weight-hanging"></i> Suitcase Status</h2>
+                    <div class="suitcase-widget">
+                        <svg id="suitcase-svg" viewBox="0 0 100 100">
+                            <path d="M85,30H70V20a5,5,0,0,0-5-5H35a5,5,0,0,0-5,5V30H15A5,5,0,0,0,10,35V85a5,5,0,0,0,5,5H85a5,5,0,0,0,5-5V35A5,5,0,0,0,85,30ZM35,25H65V30H35Z" fill="#ccc"/>
+                            <rect id="suitcase-fill" x="10" y="30" width="80" height="60" />
+                        </svg>
+                        <div class="weight-display"><span id="currentWeight">0.0</span> / <span id="maxWeight">23.0</span> kg</div>
                     </div>
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="weightProgress" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-labels">
-                            <span>0 kg</span>
-                            <span id="warningThreshold">15 kg</span>
-                            <span id="maxThreshold">23 kg</span>
-                        </div>
-                    </div>
-                    <button class="undo-btn" id="undoBtn">
-                        <i class="fas fa-undo"></i>
-                        <span>Undo</span>
-                    </button>
-                    <div class="categories-grid" id="categoriesGrid">
-                        <!-- Categories will be populated by JS -->
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <h2 class="panel-title"><i class="fas fa-check-circle"></i> Packed Items</h2>
-                    <div class="packed-items" id="packedItems">
-                        <!-- Packed items will be populated by JS -->
-                    </div>
-                    <div class="export-buttons">
-                        <button class="btn-outline btn-small" id="exportTextBtn">
-                            <i class="fas fa-copy"></i> Copy as Text
-                        </button>
-                        <button class="btn-outline btn-small" id="exportPdfBtn">
-                            <i class="fas fa-file-pdf"></i> Export PDF
-                        </button>
-                        <button class="btn-outline btn-small" id="exportVisualBtn">
-                            <i class="fas fa-image"></i> Export Visual
-                        </button>
-                    </div>
+                    <div class="categories-grid" id="categoriesGrid"></div>
                 </div>
             </div>
 
             <div class="main-content">
+                <!-- Packing List Panel -->
                 <div class="panel">
-                    <h2 class="panel-title"><i class="fas fa-box-open"></i> Packing List</h2>
-                    <div class="drag-hint">
-                        <i class="fas fa-arrow-left"></i> Swipe left to skip • Swipe right to pack <i class="fas fa-arrow-right"></i>
-                    </div>
-                    <div id="itemsContainer">
-                        <!-- Item cards will be populated by JS -->
-                    </div>
-                    <button class="btn-outline" id="addItemBtn"><i class="fas fa-plus"></i> Add Custom Item</button>
+                    <h2 class="panel-title"><i class="fas fa-box-open"></i> Your Packing List</h2>
+                    <div class="swipe-hint"><i class="fas fa-arrows-alt-h"></i> Swipe cards left or right to sort</div>
+                    <div id="itemsContainer"><p>Enter your trip details and generate a list!</p></div>
+                    <button id="addCustomItemBtn" class="btn-outline" style="width: 100%; margin-top: 15px;"><i class="fas fa-plus"></i> Add Custom Item</button>
                 </div>
 
+                <!-- Travel Info Panel -->
                 <div class="panel">
-                    <h2 class="panel-title"><i class="fas fa-globe-americas"></i> Travel Info</h2>
-                    <div class="travel-info" id="travelInfo">
-                        <div class="info-item">
-                            <i class="fas fa-info-circle"></i>
-                            <span>Select a destination to see travel tips</span>
-                        </div>
+                    <h2 class="panel-title"><i class="fas fa-globe-americas"></i> Travel Intel</h2>
+                    <div id="travelInfoContainer">
+                        <div class="info-item"><i class="fas fa-info-circle"></i><div class="info-item-content"><p>Generate a list to get travel tips.</p></div></div>
                     </div>
-                    <div class="weather-widget" id="weatherWidget">
-                        <!-- Weather info will be populated by JS -->
-                    </div>
-                    <div class="currency-widget" id="currencyWidget">
-                        <!-- Currency info will be populated by JS -->
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <h2 class="panel-title"><i class="fas fa-robot"></i> Packing Assistant</h2>
-                    <div class="ai-message">
-                        <p>Need help with your packing? Ask me anything about your trip!</p>
-                    </div>
-                    <button id="aiAssistantBtn"><i class="fas fa-comment"></i> Open AI Assistant</button>
                 </div>
             </div>
         </div>
-
-        <div class="mobile-nav">
-            <div class="nav-buttons">
-                <a href="#" class="nav-btn" id="mobileGenerate">
-                    <i class="fas fa-magic"></i>
-                    <span>Generate</span>
-                </a>
-                <a href="#" class="nav-btn" id="mobileShare">
-                    <i class="fas fa-share-alt"></i>
-                    <span>Share</span>
-                </a>
-                <a href="#" class="nav-btn" id="mobileTheme">
-                    <i class="fas fa-moon"></i>
-                    <span>Theme</span>
-                </a>
-                <a href="#" class="nav-btn" id="mobileAI">
-                    <i class="fas fa-robot"></i>
-                    <span>Assistant</span>
-                </a>
+    </div>
+    
+    <!-- Mobile Navigation & Modals... -->
+    <nav class="mobile-nav">
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn" id="mobileShare"><i class="fas fa-share-alt"></i><span>Share</span></a>
+            <a href="#" class="nav-btn" id="mobileTheme"><i class="fas fa-moon"></i><span>Theme</span></a>
+        </div>
+    </nav>
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Share & Export</h3><button class="modal-close">&times;</button></div>
+            <div class="form-group"><label>Export Options</label>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                    <button class="btn-outline" id="exportTextBtn"><i class="fas fa-copy"></i> Copy as Text</button>
+                    <button class="btn-outline" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Export Styled PDF</button>
+                    <button class="btn-outline" id="exportImgBtn"><i class="fas fa-image"></i> Export as Image</button>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Undo Notification -->
-    <div class="undo-notification" id="undoNotification">
-        <span>Item removed</span>
-        <button id="undoActionBtn">Undo</button>
-    </div>
-
-    <!-- Add Item Modal -->
     <div class="modal" id="addItemModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Custom Item</h3>
-                <button class="modal-close" id="closeAddItemModal">&times;</button>
+            <div class="modal-header"><h3>Add Custom Item</h3><button class="modal-close">&times;</button></div>
+            <div class="form-group"><label for="itemName">Item Name</label><input type="text" id="itemName" placeholder="e.g., Travel Pillow"></div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="itemCategory">Category</label>
+                    <select id="itemCategory"></select>
+                </div>
+                <div class="form-group">
+                    <label for="itemQuantity">Quantity</label>
+                    <input type="number" id="itemQuantity" min="1" value="1">
+                </div>
             </div>
-            <div class="form-group">
-                <label for="itemName">Item Name</label>
-                <input type="text" id="itemName" placeholder="e.g. Travel Adapter">
-            </div>
-            <div class="form-group">
-                <label for="itemCategory">Category</label>
-                <select id="itemCategory">
-                    <option value="clothing">Clothing</option>
-                    <option value="electronics">Electronics</option>
-                    <option value="toiletries">Toiletries</option>
-                    <option value="documents">Documents</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="itemWeight">Weight (kg)</label>
-                <input type="number" id="itemWeight" min="0" step="0.1" value="0.5">
-            </div>
-            <div class="form-group">
-                <label for="itemQuantity">Quantity</label>
-                <input type="number" id="itemQuantity" min="1" value="1">
-            </div>
+            <div class="form-group"><label for="itemWeight">Weight (kg) per item</label><input type="number" id="itemWeight" min="0" step="0.1" value="0.3"></div>
             <button id="saveItemBtn">Add Item</button>
         </div>
     </div>
-
-    <!-- AI Assistant Modal -->
-    <div class="modal" id="aiModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Packing Assistant</h3>
-                <button class="modal-close" id="closeAIModal">&times;</button>
-            </div>
-            <div class="chat-container">
-                <div class="chat-messages" id="aiChat">
-                    <div class="ai-message">
-                        <p>Hi there! I'm your PackPal assistant. I can help with:</p>
-                        <ul>
-                            <li>Packing suggestions for your destination</li>
-                            <li>Airline baggage policies</li>
-                            <li>Travel tips and advice</li>
-                        </ul>
-                        <p>What would you like to know?</p>
-                    </div>
-                </div>
-                <div class="quick-questions">
-                    <button class="quick-question" data-question="What should I pack for the weather?">Weather</button>
-                    <button class="quick-question" data-question="What are the airline baggage rules?">Airline Rules</button>
-                    <button class="quick-question" data-question="Suggest essential items">Essentials</button>
-                    <button class="quick-question" data-question="Create a packing template">Save Template</button>
-                </div>
-                <div class="chat-input">
-                    <input type="text" id="aiQuestion" placeholder="Ask me anything...">
-                    <button id="sendQuestion"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Share Modal -->
-    <div class="modal" id="shareModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Share Your Packing List</h3>
-                <button class="modal-close" id="closeShareModal">&times;</button>
-            </div>
-            <div class="form-group">
-                <label>Share Link</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="shareLink" readonly style="flex-grow: 1;">
-                    <button id="copyLinkBtn"><i class="fas fa-copy"></i></button>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Export Options</label>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button class="btn-outline" id="exportTextModalBtn">
-                        <i class="fas fa-copy"></i> Text
-                    </button>
-                    <button class="btn-outline" id="exportPdfModalBtn">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </button>
-                    <button class="btn-outline" id="exportVisualModalBtn">
-                        <i class="fas fa-image"></i> Visual
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Visual Export Modal -->
-    <div class="modal" id="visualExportModal">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h3>Visual Packing List</h3>
-                <button class="modal-close" id="closeVisualModal">&times;</button>
-            </div>
-            <div id="visualExportContent">
-                <div class="visual-export">
-                    <div class="export-header">
-                        <div class="export-logo">
-                            <i class="fas fa-suitcase"></i>
-                            <span>PackPal</span>
-                        </div>
-                        <div class="export-title">Packing List</div>
-                    </div>
-                    <div class="export-section">
-                        <div class="export-section-title">Trip Details</div>
-                        <div class="export-item">
-                            <span>Destination:</span>
-                            <span id="exportDestination">Not specified</span>
-                        </div>
-                        <div class="export-item">
-                            <span>Duration:</span>
-                            <span id="exportDuration">7 days</span>
-                        </div>
-                        <div class="export-item">
-                            <span>Travelers:</span>
-                            <span id="exportTravelers">1</span>
-                        </div>
-                    </div>
-                    <div class="export-section">
-                        <div class="export-section-title">Packed Items</div>
-                        <div id="exportItemsList">
-                            <!-- Items will be populated by JS -->
-                        </div>
-                    </div>
-                    <div class="export-section">
-                        <div class="export-item">
-                            <span><strong>Total Weight:</strong></span>
-                            <span><strong id="exportTotalWeight">0.0 kg</strong></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button id="downloadVisualBtn" style="margin-top: 20px;">
-                <i class="fas fa-download"></i> Download as Image
-            </button>
-        </div>
+    <div class="undo-notification" id="undoNotification">
+        <span>Item removed.</span><button id="undoActionBtn">Undo</button>
     </div>
 
     <script>
-        // Sample data
-        const categories = [
-            { id: 'clothing', name: 'Clothing', icon: 'tshirt' },
-            { id: 'electronics', name: 'Electronics', icon: 'laptop' },
-            { id: 'toiletries', name: 'Toiletries', icon: 'soap' },
-            { id: 'documents', name: 'Documents', icon: 'passport' },
-            { id: 'accessories', name: 'Accessories', icon: 'glasses' },
-            { id: 'medication', name: 'Medication', icon: 'pills' },
-            { id: 'other', name: 'Other', icon: 'ellipsis-h' }
-        ];
+    document.addEventListener('DOMContentLoaded', () => {
 
-        const sampleItems = [
-            { id: 1, name: 'T-Shirts', category: 'clothing', icon: 'tshirt', weight: 0.2, quantity: 5 },
-            { id: 2, name: 'Jeans', category: 'clothing', icon: 'tshirt', weight: 0.5, quantity: 2 },
-            { id: 3, name: 'Underwear', category: 'clothing', icon: 'tshirt', weight: 0.05, quantity: 7 },
-            { id: 4, name: 'Socks', category: 'clothing', icon: 'socks', weight: 0.05, quantity: 7 },
-            { id: 5, name: 'Toothbrush', category: 'toiletries', icon: 'tooth', weight: 0.05, quantity: 1 },
-            { id: 6, name: 'Toothpaste', category: 'toiletries', icon: 'tooth', weight: 0.1, quantity: 1 },
-            { id: 7, name: 'Shampoo', category: 'toiletries', icon: 'pump-soap', weight: 0.3, quantity: 1 },
-            { id: 8, name: 'Laptop', category: 'electronics', icon: 'laptop', weight: 2.0, quantity: 1 },
-            { id: 9, name: 'Phone Charger', category: 'electronics', icon: 'mobile-alt', weight: 0.1, quantity: 1 },
-            { id: 10, name: 'Passport', category: 'documents', icon: 'passport', weight: 0.1, quantity: 1 },
-            { id: 11, name: 'Sunglasses', category: 'accessories', icon: 'glasses', weight: 0.1, quantity: 1 },
-            { id: 12, name: 'Headphones', category: 'electronics', icon: 'headphones', weight: 0.3, quantity: 1 },
-            { id: 13, name: 'Swimsuit', category: 'clothing', icon: 'swimming-pool', weight: 0.2, quantity: 1 },
-            { id: 14, name: 'Jacket', category: 'clothing', icon: 'tshirt', weight: 0.8, quantity: 1 },
-            { id: 15, name: 'Shoes', category: 'clothing', icon: 'shoe-prints', weight: 1.0, quantity: 1 },
-            { id: 16, name: 'Hat', category: 'accessories', icon: 'hat-cowboy', weight: 0.1, quantity: 1 },
-            { id: 17, name: 'Umbrella', category: 'accessories', icon: 'umbrella', weight: 0.5, quantity: 1 }
-        ];
-
-        const destinationTips = {
-            'new york': [
-                'Weather can vary greatly - pack layers',
-                'Comfortable walking shoes are a must',
-                'Umbrella recommended year-round'
-            ],
-            'paris': [
-                'Stylish clothing preferred in many restaurants',
-                'Comfortable shoes for cobblestone streets',
-                'Travel adapter for Type E outlets'
-            ],
-            'tokyo': [
-                'Remove shoes when entering homes/temples',
-                'Portable WiFi recommended',
-                'Cash is still king in many places'
-            ],
-            'london': [
-                'Pack for rain - waterproof jacket essential',
-                'Travel adapter for Type G outlets',
-                'Oyster card or contactless payment for transport'
-            ],
-            'dubai': [
-                'Lightweight clothing for hot weather',
-                'Modest clothing for visiting religious sites',
-                'Sunglasses and sunscreen essential'
-            ],
-            'sydney': [
-                'Sun protection is crucial',
-                'Swimsuit for beaches',
-                'Casual clothing preferred'
-            ],
-            'default': [
-                'Check weather forecast before packing',
-                'Pack essential medications in carry-on',
-                'Keep valuables and documents secure'
-            ]
-        };
-
-        const currencyRates = {
-            'new york': { code: 'USD', rate: 1, symbol: '$' },
-            'paris': { code: 'EUR', rate: 0.85, symbol: '€' },
-            'tokyo': { code: 'JPY', rate: 110, symbol: '¥' },
-            'london': { code: 'GBP', rate: 0.75, symbol: '£' },
-            'dubai': { code: 'AED', rate: 3.67, symbol: 'د.إ' },
-            'sydney': { code: 'AUD', rate: 1.35, symbol: 'A$' },
-            'rome': { code: 'EUR', rate: 0.85, symbol: '€' },
-            'barcelona': { code: 'EUR', rate: 0.85, symbol: '€' },
-            'berlin': { code: 'EUR', rate: 0.85, symbol: '€' },
-            'singapore': { code: 'SGD', rate: 1.35, symbol: 'S$' },
-            'default': { code: 'USD', rate: 1, symbol: '$' }
-        };
-
-        const popularDestinations = [
-            "New York, USA",
-            "Paris, France",
-            "Tokyo, Japan",
-            "London, UK",
-            "Sydney, Australia",
-            "Rome, Italy",
-            "Barcelona, Spain",
-            "Berlin, Germany",
-            "Dubai, UAE",
-            "Singapore",
-            "Bangkok, Thailand",
-            "Hong Kong",
-            "Toronto, Canada",
-            "Vancouver, Canada",
-            "Melbourne, Australia",
-            "Mumbai, India",
-            "Delhi, India",
-            "Shanghai, China",
-            "Beijing, China",
-            "Seoul, South Korea"
-        ];
-
-        // Airline baggage allowances (per passenger)
-        const airlineBaggageAllowances = {
-            'delta': { economy: 23, premium: 23, business: 32, first: 32 },
-            'united': { economy: 23, premium: 23, business: 32, first: 32 },
-            'american': { economy: 23, premium: 23, business: 32, first: 32 },
-            'southwest': { economy: 23, premium: 23, business: 32, first: 32 },
-            'emirates': { economy: 30, premium: 35, business: 40, first: 50 },
-            'qatar': { economy: 30, premium: 35, business: 40, first: 50 },
-            'lufthansa': { economy: 23, premium: 23, business: 32, first: 32 },
-            'british': { economy: 23, premium: 23, business: 32, first: 32 },
-            'airfrance': { economy: 23, premium: 23, business: 32, first: 32 },
-            'singapore': { economy: 30, premium: 35, business: 40, first: 50 },
-            'qantas': { economy: 23, premium: 23, business: 32, first: 32 },
-            'aircanada': { economy: 23, premium: 23, business: 32, first: 32 },
-            'ana': { economy: 23, premium: 23, business: 32, first: 32 },
-            'jal': { economy: 23, premium: 23, business: 32, first: 32 },
-            'cathay': { economy: 30, premium: 35, business: 40, first: 50 },
-            'airchina': { economy: 23, premium: 23, business: 32, first: 32 },
-            'indigo': { economy: 15, premium: 20, business: 25, first: 30 },
-            'airasia': { economy: 15, premium: 20, business: 25, first: 30 }
-        };
-		
-		// Default baggage allowance when no airline is selected
-        const DEFAULT_BAGGAGE_ALLOWANCE = {
-            economy: 20,
-            premium: 25,
-            business: 30,
-            first: 40
-        };
-
-        // App state
-        let state = {
+        // --- 1. STATE MANAGEMENT ---
+        const STATE = {
             items: [],
             packedItems: [],
-            currentWeight: 0,
-            maxWeight: 23,
-            warningThreshold: 15,
-            theme: 'light',
-            tripId: null,
             lastAction: null,
-            aiChatHistory: []
+            theme: 'light',
+            tripDetails: {},
+            categories: [
+                { id: 'clothing', name: 'Clothing', icon: 'tshirt' },
+                { id: 'electronics', name: 'Electronics', icon: 'laptop' },
+                { id: 'toiletries', name: 'Toiletries', icon: 'pump-soap' },
+                { id: 'documents', name: 'Documents', icon: 'passport' },
+                { id: 'accessories', name: 'Accessories', icon: 'glasses' },
+                { id: 'medication', name: 'Medication', icon: 'pills' },
+                { id: 'other', name: 'Other', icon: 'box' }
+            ],
+            swipeState: {
+                isDragging: false,
+                startX: 0,
+                currentX: 0,
+                target: null
+            }
         };
 
-        // DOM elements
-        const elements = {
+        // --- 2. DOM ELEMENT REFERENCES ---
+        const DOM = {
             themeToggle: document.getElementById('themeToggle'),
+            mobileTheme: document.getElementById('mobileTheme'),
+            destinationInput: document.getElementById('destination'),
+            destinationResults: document.getElementById('destination-results'),
+            durationInput: document.getElementById('duration'),
+            seasonSelect: document.getElementById('season'),
+            activitiesInput: document.getElementById('activities'),
+            travelersInput: document.getElementById('travelers'),
+            classSelect: document.getElementById('class'),
+            airlineSelect: document.getElementById('airline'),
             generateBtn: document.getElementById('generateBtn'),
             itemsContainer: document.getElementById('itemsContainer'),
-            packedItems: document.getElementById('packedItems'),
-            categoriesGrid: document.getElementById('categoriesGrid'),
+            addCustomItemBtn: document.getElementById('addCustomItemBtn'),
+            packedItemsList: document.getElementById('packedItemsList'),
             currentWeight: document.getElementById('currentWeight'),
             maxWeight: document.getElementById('maxWeight'),
-            warningThreshold: document.getElementById('warningThreshold'),
-            maxThreshold: document.getElementById('maxThreshold'),
-            travelers: document.getElementById('travelers'),
-            airline: document.getElementById('airline'),
-            class: document.getElementById('class'),
-            travelInfo: document.getElementById('travelInfo'),
-            weightProgress: document.getElementById('weightProgress'),
-            currentWeight: document.getElementById('currentWeight'),
-            weightProgress: document.getElementById('weightProgress'),
-            destination: document.getElementById('destination'),
-            travelInfo: document.getElementById('travelInfo'),
-            weatherWidget: document.getElementById('weatherWidget'),
-            currencyWidget: document.getElementById('currencyWidget'),
-            addItemBtn: document.getElementById('addItemBtn'),
-            addItemModal: document.getElementById('addItemModal'),
-            closeAddItemModal: document.getElementById('closeAddItemModal'),
-            saveItemBtn: document.getElementById('saveItemBtn'),
-            aiModal: document.getElementById('aiModal'),
-            closeAIModal: document.getElementById('closeAIModal'),
-            aiAssistantBtn: document.getElementById('aiAssistantBtn'),
-            aiQuestion: document.getElementById('aiQuestion'),
-            sendQuestion: document.getElementById('sendQuestion'),
-            aiChat: document.getElementById('aiChat'),
-            quickQuestions: document.querySelectorAll('.quick-question'),
-            mobileGenerate: document.getElementById('mobileGenerate'),
-            mobileShare: document.getElementById('mobileShare'),
-            mobileTheme: document.getElementById('mobileTheme'),
-            mobileAI: document.getElementById('mobileAI'),
-            undoBtn: document.getElementById('undoBtn'),
-            undoNotification: document.getElementById('undoNotification'),
-            undoActionBtn: document.getElementById('undoActionBtn'),
+            suitcaseSvg: document.getElementById('suitcase-svg'),
+            suitcaseFill: document.getElementById('suitcase-fill'),
+            categoriesGrid: document.getElementById('categoriesGrid'),
+            travelInfoContainer: document.getElementById('travelInfoContainer'),
             shareBtn: document.getElementById('shareBtn'),
+            mobileShare: document.getElementById('mobileShare'),
             shareModal: document.getElementById('shareModal'),
-            closeShareModal: document.getElementById('closeShareModal'),
-            shareLink: document.getElementById('shareLink'),
-            copyLinkBtn: document.getElementById('copyLinkBtn'),
             exportTextBtn: document.getElementById('exportTextBtn'),
             exportPdfBtn: document.getElementById('exportPdfBtn'),
-            exportVisualBtn: document.getElementById('exportVisualBtn'),
-            exportTextModalBtn: document.getElementById('exportTextModalBtn'),
-            exportPdfModalBtn: document.getElementById('exportPdfModalBtn'),
-            exportVisualModalBtn: document.getElementById('exportVisualModalBtn'),
-            autocompleteList: document.getElementById('autocompleteList'),
-            visualExportModal: document.getElementById('visualExportModal'),
-            closeVisualModal: document.getElementById('closeVisualModal'),
-            exportDestination: document.getElementById('exportDestination'),
-            exportDuration: document.getElementById('exportDuration'),
-            exportTravelers: document.getElementById('exportTravelers'),
-            exportItemsList: document.getElementById('exportItemsList'),
-            exportTotalWeight: document.getElementById('exportTotalWeight'),
-            downloadVisualBtn: document.getElementById('downloadVisualBtn'),
-            visualExportContent: document.getElementById('visualExportContent'),
-            travelers: document.getElementById('travelers'),
-            airline: document.getElementById('airline'),
-            class: document.getElementById('class')
-        };
-		
-		const RECENT_EXCHANGE_RATES = {
-            'USD': 0.012,    // 1 INR = 0.012 USD
-            'EUR': 0.011,     // 1 INR = 0.011 EUR
-            'GBP': 0.0094,    // 1 INR = 0.0094 GBP
-            'JPY': 1.85,      // 1 INR = 1.85 JPY
-            'AUD': 0.018,     // 1 INR = 0.018 AUD
-            'CAD': 0.016,     // 1 INR = 0.016 CAD
-            'CHF': 0.0107,    // 1 INR = 0.0107 CHF
-            'CNY': 0.086,     // 1 INR = 0.086 CNY
-            'AED': 0.044,     // 1 INR = 0.044 AED
-            'SGD': 0.016,     // 1 INR = 0.016 SGD
-            'THB': 0.43,      // 1 INR = 0.43 THB
-            'KRW': 16.20,     // 1 INR = 16.20 KRW
-            'MYR': 0.056,     // 1 INR = 0.056 MYR
-            'IDR': 190.50,    // 1 INR = 190.50 IDR
-            'PHP': 0.68,      // 1 INR = 0.68 PHP
-            'VND': 300.25,    // 1 INR = 300.25 VND
-            'INR': 1          // 1 INR = 1 INR
+            exportImgBtn: document.getElementById('exportImgBtn'),
+            addItemModal: document.getElementById('addItemModal'),
+            itemNameInput: document.getElementById('itemName'),
+            itemCategorySelect: document.getElementById('itemCategory'),
+            itemQuantityInput: document.getElementById('itemQuantity'),
+            itemWeightInput: document.getElementById('itemWeight'),
+            saveItemBtn: document.getElementById('saveItemBtn'),
+            undoNotification: document.getElementById('undoNotification'),
+            undoActionBtn: document.getElementById('undoActionBtn'),
+            modalCloses: document.querySelectorAll('.modal-close'),
         };
 
-        // Currency symbols mapping
-        const CURRENCY_SYMBOLS = {
-            'USD': '$',
-            'EUR': '€',
-            'GBP': '£',
-            'JPY': '¥',
-            'AUD': 'A$',
-            'CAD': 'C$',
-            'CHF': 'CHF',
-            'CNY': '¥',
-            'AED': 'د.إ',
-            'SGD': 'S$',
-            'THB': '฿',
-            'KRW': '₩',
-            'MYR': 'RM',
-            'IDR': 'Rp',
-            'PHP': '₱',
-            'VND': '₫',
-            'INR': '₹'
-        };
-
-        // Destination to currency mapping
-        const DESTINATION_CURRENCIES = {
-            'new york': 'USD',
-            'paris': 'EUR',
-            'london': 'GBP',
-            'tokyo': 'JPY',
-            'sydney': 'AUD',
-            'toronto': 'CAD',
-            'zurich': 'CHF',
-            'beijing': 'CNY',
-            'dubai': 'AED',
-            'singapore': 'SGD',
-            'bangkok': 'THB',
-            'seoul': 'KRW',
-            'kuala lumpur': 'MYR',
-            'jakarta': 'IDR',
-            'manila': 'PHP',
-            'ho chi minh': 'VND',
-            'mumbai': 'INR',
-            'delhi': 'INR',
-            'default': 'USD'
-        };
-
-        // Initialize the app
-        function init() {
-            loadTheme();
-            renderCategories();
-            setupEventListeners();
-            loadTripFromURL();
-            
-            // Initialize autocomplete
-            setupAutocomplete();
-            
-            // Set up change listeners for weight calculation
-            setupWeightCalculators();
-			updateBaggageAllowance();
-			
-			if (!elements.maxWeight || !elements.warningThreshold || !elements.maxThreshold || 
-                !elements.travelers || !elements.airline || !elements.class || 
-                !elements.travelInfo || !elements.weightProgress || !elements.currentWeight) {
-                console.error("Critical elements missing from DOM");
-                return;
-            }
-
-            loadTheme();
-            renderCategories();
-            setupEventListeners();
-            loadTripFromURL();
-            setupAutocomplete();
-            
-            // Initialize baggage allowance
-            updateBaggageAllowance();
-        }
-
-        // Set up event listeners for weight calculation
-        function setupWeightCalculators() {
-            elements.travelers.addEventListener('change', updateBaggageAllowance);
-            elements.airline.addEventListener('change', updateBaggageAllowance);
-            elements.class.addEventListener('change', updateBaggageAllowance);
-        }
-
-        // Update baggage allowance based on travelers, airline and class
-        function updateBaggageAllowance() {
-            try {
-                const travelers = parseInt(elements.travelers.value) || 1;
-                const airline = elements.airline.value;
-                const travelClass = elements.class.value;
-                
-                // Get allowance per passenger
-                let allowancePerPassenger;
-                if (airline && airlineBaggageAllowances[airline]) {
-                    allowancePerPassenger = airlineBaggageAllowances[airline][travelClass] || 
-                                          airlineBaggageAllowances[airline]['economy'];
-                } else {
-                    // Use default allowance if no airline selected
-                    allowancePerPassenger = DEFAULT_BAGGAGE_ALLOWANCE[travelClass] || 
-                                          DEFAULT_BAGGAGE_ALLOWANCE['economy'];
-                }
-                
-                // Calculate total allowance
-                state.maxWeight = allowancePerPassenger * travelers;
-                state.warningThreshold = Math.floor(state.maxWeight * 0.65); // 65% of max weight
-                
-                // Update UI - ADD NULL CHECKS
-                if (elements.maxWeight) elements.maxWeight.textContent = state.maxWeight;
-                if (elements.warningThreshold) elements.warningThreshold.textContent = state.warningThreshold + ' kg';
-                if (elements.maxThreshold) elements.maxThreshold.textContent = state.maxWeight + ' kg';
-                
-                updateWeightDisplay();
-                showBaggageAllowanceInfo(allowancePerPassenger, travelers);
-            } catch (error) {
-                console.error("Error updating baggage allowance:", error);
-            }
-        }
-		
-		// Show information about current baggage allowance
-        function showBaggageAllowanceInfo(allowancePerPassenger, travelers) {
-            try {
-                const airline = elements.airline.value;
-                const travelClass = elements.class.value;
-                const airlineSelect = elements.airline;
-                const airlineOption = airlineSelect ? airlineSelect.querySelector(`option[value="${airline}"]`) : null;
-                const airlineName = airlineOption ? airlineOption.text : 'your airline';
-                
-                const classNames = {
-                    economy: 'Economy',
-                    premium: 'Premium Economy',
-                    business: 'Business',
-                    first: 'First Class'
-                };
-                
-                const info = document.createElement('div');
-                info.className = 'info-item baggage-info';
-                info.innerHTML = `
-                    <i class="fas fa-suitcase"></i>
-                    <span>Baggage Allowance: ${allowancePerPassenger}kg/passenger × ${travelers} traveler${travelers > 1 ? 's' : ''} 
-                    (${classNames[travelClass] || travelClass} on ${airlineName})</span>
-                `;
-                
-                // Remove previous baggage info if exists
-                const existingInfo = elements.travelInfo.querySelector('.baggage-info');
-                if (existingInfo) {
-                    existingInfo.remove();
-                }
-                
-                if (elements.travelInfo) {
-                    elements.travelInfo.insertBefore(info, elements.travelInfo.firstChild);
-                }
-            } catch (error) {
-                console.error("Error showing baggage info:", error);
-            }
-        }
-
-        // Load saved theme or detect preference
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('packpal-theme');
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            if (savedTheme) {
-                state.theme = savedTheme;
-            } else if (systemPrefersDark) {
-                state.theme = 'dark';
-            }
-            
-            applyTheme();
-        }
-
-        // Apply current theme
-        function applyTheme() {
-            document.body.setAttribute('data-theme', state.theme);
-            const icon = state.theme === 'dark' ? 'fa-sun' : 'fa-moon';
-            elements.themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-            elements.mobileTheme.innerHTML = `<i class="fas ${icon}"></i><span>Theme</span>`;
-        }
-
-        // Toggle between light/dark theme
-        function toggleTheme() {
-            state.theme = state.theme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('packpal-theme', state.theme);
-            applyTheme();
-        }
-
-        // Setup destination autocomplete
-        function setupAutocomplete() {
-            elements.destination.addEventListener('input', function() {
-                const input = this.value.toLowerCase();
-                elements.autocompleteList.innerHTML = '';
-                
-                if (!input) return;
-                
-                const matches = popularDestinations.filter(dest => 
-                    dest.toLowerCase().includes(input)
-                );
-                
-                matches.forEach(match => {
-                    const div = document.createElement('div');
-                    div.textContent = match;
-                    div.addEventListener('click', function() {
-                        elements.destination.value = match;
-                        elements.autocompleteList.innerHTML = '';
-                        updateDestinationInfo();
-                    });
-                    elements.autocompleteList.appendChild(div);
-                });
-            });
-            
-            // Hide autocomplete when clicking outside
-            document.addEventListener('click', function(e) {
-                if (e.target !== elements.destination) {
-                    elements.autocompleteList.innerHTML = '';
-                }
-            });
-        }
-
-        // Render category cards
-        function renderCategories() {
-            elements.categoriesGrid.innerHTML = categories.map(category => `
-                <div class="category-card" data-category="${category.id}">
-                    <div class="category-icon"><i class="fas fa-${category.icon}"></i></div>
-                    <div class="category-name">${category.name}</div>
-                    <div class="category-count">0/0</div>
-                </div>
-            `).join('');
-        }
-
-        // Generate packing list based on trip details
-        function generatePackingList() {
-            const duration = parseInt(document.getElementById('duration').value) || 7;
-            const travelers = parseInt(document.getElementById('travelers').value) || 1;
-            
-            // Generate a unique trip ID
-            state.tripId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-            
-            // Update baggage allowance first
-            updateBaggageAllowance();
-            
-            // Adjust quantities based on trip duration and travelers
-            state.items = sampleItems.map(item => {
-                let quantity = item.quantity;
-                
-                // Adjust clothing quantities based on trip length
-                if (item.category === 'clothing') {
-                    if (item.name.includes('T-Shirts') || item.name.includes('Underwear') || item.name.includes('Socks')) {
-                        quantity = Math.ceil(duration / 2) * travelers;
-                    } else if (item.name.includes('Jeans')) {
-                        quantity = Math.min(3, Math.ceil(duration / 4)) * travelers;
+        // --- 3. DATA & SUGGESTION ENGINE ---
+        const DATA = {
+            airlineAllowances: {
+                default: { economy: 23, business: 32, first: 32 },
+                emirates: { economy: 30, business: 40, first: 50 },
+                qatar: { economy: 30, business: 40, first: 50 },
+                singapore: { economy: 30, business: 40, first: 50 },
+                delta: { economy: 23, business: 32, first: 32 },
+                united: { economy: 23, business: 32, first: 32 },
+                lufthansa: { economy: 23, business: 32, first: 32 }
+            },
+            // Comprehensive list of countries with their data
+            countryData: {
+                "Afghanistan": { currency: "AFN", rate: 0.94, symbol: "؋", biome: "desert", tips: ["Dress conservatively.", "Be aware of the security situation.", "Hospitality is a key part of the culture."] },
+                "Albania": { currency: "ALL", rate: 0.88, symbol: "L", biome: "temperate", tips: ["Enjoy the affordable prices.", "Explore the beautiful coastline.", "A nod up means 'no', and a shake side-to-side means 'yes'."] },
+                "Algeria": { currency: "DZD", rate: 0.62, symbol: "د.ج", biome: "desert", tips: ["A visa is required for most visitors.", "French is widely spoken.", "The Sahara desert offers incredible landscapes."] },
+                "Argentina": { currency: "ARS", rate: 0.09, symbol: "$", biome: "temperate", tips: ["Steak and Malbec wine are national treasures.", "Tango shows in Buenos Aires are a must-see.", "Be prepared for late dinners, often starting after 9 PM."] },
+                "Australia": { currency: "AUD", rate: 55.2, symbol: "A$", biome: "temperate", tips: ["Sun protection is crucial.", "Tipping is not obligatory but is appreciated.", "'No worries' is a common, friendly phrase."] },
+                "Austria": { currency: "EUR", rate: 90.8, symbol: "€", biome: "alpine", tips: ["Enjoy the coffee house culture in Vienna.", "Hiking in the Alps is spectacular.", "Formal titles are often used."] },
+                "Brazil": { currency: "BRL", rate: 15.5, symbol: "R$", biome: "tropical", tips: ["A 'thumbs-up' is a common gesture.", "Be cautious in large cities.", "Lunch is the main meal of the day."] },
+                "Canada": { currency: "CAD", rate: 61.2, symbol: "C$", biome: "alpine", tips: ["Tipping (15-20%) is standard.", "Explore the vast national parks.", "Both English and French are official languages."] },
+                "China": { currency: "CNY", rate: 11.5, symbol: "¥", biome: "temperate", tips: ["A VPN is needed to access many Western websites.", "Bargaining is common in markets.", "Use WeChat or Alipay for mobile payments."] },
+                "Egypt": { currency: "EGP", rate: 1.75, symbol: "E£", biome: "desert", tips: ["Bargaining is expected in markets.", "Dress modestly, especially at religious sites.", "Stay hydrated."] },
+                "France": { currency: "EUR", rate: 90.8, symbol: "€", biome: 'temperate', tips: ["Always greet with 'Bonjour' when entering a shop.", "A service charge is usually included in restaurant bills.", "Be mindful of pickpockets in major tourist areas like Paris."] },
+                "Germany": { currency: "EUR", rate: 90.8, symbol: "€", biome: "temperate", tips: ["Punctuality is very important.", "Cash is preferred in many smaller shops and restaurants.", "The Autobahn has sections with no speed limit."] },
+                "Greece": { currency: "EUR", rate: 90.8, symbol: "€", biome: "temperate", tips: ["Island hopping is a popular activity.", "Enjoy the relaxed pace of life.", "A 'siesta' in the afternoon is common."] },
+                "India": { currency: "INR", rate: 1.0, symbol: "₹", biome: "tropical", tips: ["Bargaining is common.", "Be prepared for a sensory overload.", "Respect local customs and dress modestly."] },
+                "Italy": { currency: "EUR", rate: 90.8, symbol: "€", biome: "temperate", tips: ["A 'coperto' (cover charge) is common in restaurants.", "Don't order a cappuccino after 11 AM.", "Validate your train tickets before boarding."] },
+                "Japan": { currency: 'JPY', rate: 0.54, symbol: '¥', biome: 'temperate', tips: ["Purchase a Japan Rail Pass before you arrive for cost-effective travel.", "Carry cash, as many smaller establishments don't accept cards.", "Bowing is a sign of respect; a simple nod is fine for tourists."] },
+                "Mexico": { currency: "MXN", rate: 4.6, symbol: "$", biome: "tropical", tips: ["Enjoy the diverse and regional cuisine.", "Be cautious with tap water; drink bottled water.", "Spanish is the official language."] },
+                "Morocco": { currency: "MAD", rate: 8.4, symbol: "د.م.", biome: "desert", tips: ["Haggling in the souks is part of the experience.", "Mint tea is a symbol of hospitality.", "Dress conservatively."] },
+                "New Zealand": { currency: "NZD", rate: 51.5, symbol: "NZ$", biome: "alpine", tips: ["Outdoor activities are a must.", "Driving is on the left.", "The 'haka' is a traditional Māori war dance."] },
+                "South Africa": { currency: "ZAR", rate: 4.5, symbol: "R", biome: "temperate", tips: ["Go on a safari in Kruger National Park.", "It has 11 official languages.", "Be aware of your surroundings for safety."] },
+                "Spain": { currency: "EUR", rate: 90.8, symbol: "€", biome: "temperate", tips: ["Dinner is eaten late, often after 9 PM.", "Siestas are common in the afternoon.", "Each region has its own distinct culture and cuisine."] },
+                "Switzerland": { currency: 'CHF', rate: 92.5, symbol: 'Fr', biome: 'alpine', tips: ["Punctuality is highly valued.", "Tap water is of excellent quality and safe to drink.", "A Swiss Travel Pass can offer great value for transport and museums."] },
+                "Thailand": { currency: 'THB', rate: 2.28, symbol: '฿', biome: 'tropical', tips: ["The 'wai' is the traditional greeting.", "Never touch someone's head or point your feet at people or religious icons.", "Street food is a highlight; choose vendors with high turnover."] },
+                "Turkey": { currency: "TRY", rate: 2.5, symbol: "₺", biome: "temperate", tips: ["Enjoy a traditional Turkish bath (hammam).", "Bargaining is expected in the Grand Bazaar.", "Drink lots of Turkish tea (çay)."] },
+                "United Arab Emirates": { currency: 'AED', rate: 22.7, symbol: 'د.إ', biome: 'desert', tips: ["Dress modestly in public areas out of respect for local culture.", "Public displays of affection are not permitted.", "The work week is typically Sunday to Thursday."] },
+                "United Kingdom": { currency: "GBP", rate: 106.2, symbol: "£", biome: "temperate", tips: ["Queuing is a way of life.", "The weather is famously unpredictable.", "Pub culture is central to social life."] },
+                "United States": { currency: 'USD', rate: 83.5, symbol: '$', biome: 'temperate', tips: ["Tipping (15-20%) is customary in restaurants and for services.", "Sales tax is added at checkout, it's not included in the tag price.", "Distances are vast; plan for long travel times between cities."] },
+                "Vietnam": { currency: "VND", rate: 0.0033, symbol: "₫", biome: "tropical", tips: ["Crossing the street in busy cities requires confidence.", "Try the local coffee.", "Motorbikes are the most common form of transport."] },
+                "default": { currency: 'USD', rate: 83.5, symbol: '$', biome: 'temperate', tips: ["Always inform your bank of your travel plans to avoid card issues.", "Keep digital and physical copies of your important documents.", "Learn a few basic phrases in the local language; it's always appreciated."] }
+            },
+            itemPacks: {
+                essentials: [
+                    { name: 'Passport/ID', category: 'documents', weight: 0.1, quantity: 1 },
+                    { name: 'Phone & Charger', category: 'electronics', weight: 0.2, quantity: 1 },
+                    { name: 'Wallet (Cash & Cards)', category: 'documents', weight: 0.2, quantity: 1 },
+                    { name: 'Keys', category: 'other', weight: 0.1, quantity: 1 },
+                    { name: 'Prescription Medication', category: 'medication', weight: 0.3, quantity: 1 }
+                ],
+                clothingBase: (days) => [
+                    { name: 'Underwear & Socks', category: 'clothing', weight: 0.05, quantity: days },
+                    { name: 'T-shirts/Tops', category: 'clothing', weight: 0.2, quantity: Math.ceil(days / 1.5) },
+                    { name: 'Pants/Bottoms', category: 'clothing', weight: 0.6, quantity: Math.ceil(days / 3) },
+                    { name: 'Pajamas', category: 'clothing', weight: 0.4, quantity: 1 },
+                ],
+                biomes: {
+                    temperate: {
+                        Summer: [{ name: 'Light Jacket', category: 'clothing', weight: 0.6, quantity: 1 }, { name: 'Sunglasses', category: 'accessories', weight: 0.1, quantity: 1 }],
+                        Winter: [{ name: 'Warm Coat', category: 'clothing', weight: 1.5, quantity: 1 }, { name: 'Scarf, Gloves & Hat', category: 'accessories', weight: 0.4, quantity: 1 }, { name: 'Thermal Layers', category: 'clothing', weight: 0.5, quantity: 2 }],
+                        'Spring/Fall': [{ name: 'Medium Jacket/Sweater', category: 'clothing', weight: 0.8, quantity: 1 }, { name: 'Umbrella', category: 'accessories', weight: 0.3, quantity: 1 }]
+                    },
+                    tropical: {
+                        Summer: [{ name: 'Swimsuit', category: 'clothing', weight: 0.2, quantity: 2 }, { name: 'Sunscreen', category: 'toiletries', weight: 0.2, quantity: 1 }, { name: 'Insect Repellent', category: 'toiletries', weight: 0.2, quantity: 1 }, { name: 'Sandals/Flip-flops', category: 'clothing', weight: 0.3, quantity: 1 }],
+                        Winter: [{ name: 'Light Rain Jacket', category: 'clothing', weight: 0.4, quantity: 1 }, { name: 'Swimsuit', category: 'clothing', weight: 0.2, quantity: 1 }],
+                        'Spring/Fall': [{ name: 'Light Rain Jacket', category: 'clothing', weight: 0.4, quantity: 1 }, { name: 'Swimsuit', category: 'clothing', weight: 0.2, quantity: 1 }]
+                    },
+                    desert: {
+                        Summer: [{ name: 'Sun Hat', category: 'accessories', weight: 0.2, quantity: 1 }, { name: 'Sunglasses', category: 'accessories', weight: 0.1, quantity: 1 }, { name: 'Lip Balm', category: 'toiletries', weight: 0.05, quantity: 1 }, { name: 'Light Long-Sleeved Shirt', category: 'clothing', weight: 0.3, quantity: 2 }],
+                        Winter: [{ name: 'Warm Jacket (for nights)', category: 'clothing', weight: 1.0, quantity: 1 }, { name: 'Moisturizer', category: 'toiletries', weight: 0.1, quantity: 1 }],
+                        'Spring/Fall': [{ name: 'Jacket/Fleece', category: 'clothing', weight: 0.8, quantity: 1 }, { name: 'Sun Hat', category: 'accessories', weight: 0.2, quantity: 1 }]
+                    },
+                    alpine: {
+                        Summer: [{ name: 'Hiking Boots', category: 'clothing', weight: 1.2, quantity: 1 }, { name: 'Fleece Jacket', category: 'clothing', weight: 0.6, quantity: 1 }, { name: 'Rain Gear', category: 'clothing', weight: 0.5, quantity: 1 }],
+                        Winter: [{ name: 'Insulated Winter Coat', category: 'clothing', weight: 1.8, quantity: 1 }, { name: 'Snow Pants', category: 'clothing', weight: 1.0, quantity: 1 }, { name: 'Goggles/Sunglasses', category: 'accessories', weight: 0.2, quantity: 1 }, { name: 'Thermal Layers', category: 'clothing', weight: 0.5, quantity: 3 }],
+                        'Spring/Fall': [{ name: 'Waterproof Jacket', category: 'clothing', weight: 0.7, quantity: 1 }, { name: 'Hiking Shoes', category: 'clothing', weight: 1.0, quantity: 1 }, { name: 'Layers (Fleece, etc.)', category: 'clothing', weight: 0.6, quantity: 2 }]
                     }
+                },
+                activities: {
+                    beach: [{ name: 'Beach Towel', category: 'accessories', weight: 0.5, quantity: 1 }, { name: 'Swimsuit', category: 'clothing', weight: 0.2, quantity: 2 }],
+                    hiking: [{ name: 'Daypack', category: 'accessories', weight: 0.6, quantity: 1 }, { name: 'Water Bottle', category: 'accessories', weight: 0.2, quantity: 1 }, { name: 'First-Aid Kit', category: 'medication', weight: 0.4, quantity: 1 }],
+                    sightseeing: [{ name: 'Comfortable Walking Shoes', category: 'clothing', weight: 0.8, quantity: 1 }, { name: 'Portable Power Bank', category: 'electronics', weight: 0.4, quantity: 1 }],
+                    business: [{ name: 'Formal Outfit', category: 'clothing', weight: 1.2, quantity: 2 }, { name: 'Laptop & Charger', category: 'electronics', weight: 2.0, quantity: 1 }, { name: 'Travel Steamer', category: 'electronics', weight: 0.5, quantity: 1 }]
                 }
-                
-                // Adjust toiletries based on travelers
-                if (item.category === 'toiletries' && !item.name.includes('Toothbrush')) {
-                    quantity = travelers;
-                }
-                
-                return { ...item, quantity };
-            });
-            
-            // Filter out packed items from the main list
-            state.items = state.items.filter(item => 
-                !state.packedItems.some(packed => packed.id === item.id)
-            );
-            
-            renderItemCards();
-            updateDestinationInfo();
-            updateShareLink();
-            
-            // Show undo button if there are actions
-            updateUndoButton();
-        }
+            },
+            generate() {
+                const { duration, destination, season, activities } = STATE.tripDetails;
+                const countryInfo = DATA.countryData[destination] || DATA.countryData.default;
+                const biome = countryInfo.biome;
+                let items = new Map();
+                const addItem = (item) => {
+                    const existing = items.get(item.name.toLowerCase());
+                    if (existing) {
+                        existing.quantity += item.quantity;
+                    } else {
+                        items.set(item.name.toLowerCase(), { ...item });
+                    }
+                };
 
-        // Render item cards for packing
-        function renderItemCards() {
-            elements.itemsContainer.innerHTML = state.items.map(item => `
-                <div class="item-card" data-id="${item.id}" draggable="true">
-                    <div class="item-icon"><i class="fas fa-${item.icon}"></i></div>
+                this.itemPacks.essentials.forEach(addItem);
+                this.itemPacks.clothingBase(duration).forEach(addItem);
+                if (this.itemPacks.biomes[biome]?.[season]) {
+                    this.itemPacks.biomes[biome][season].forEach(addItem);
+                }
+                Object.keys(this.itemPacks.activities).forEach(key => {
+                    if (activities.toLowerCase().includes(key)) {
+                        this.itemPacks.activities[key].forEach(addItem);
+                    }
+                });
+                return Array.from(items.values());
+            },
+            getIntel() {
+                const dest = STATE.tripDetails.destination;
+                return DATA.countryData[dest] || DATA.countryData.default;
+            }
+        };
+
+        // --- 4. UI MODULE ---
+        const UI = {
+            init() { this.renderCategories(); this.populateCategorySelect(); },
+            applyTheme(theme) {
+                document.body.setAttribute('data-theme', theme);
+                const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+                DOM.themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+                DOM.mobileTheme.innerHTML = `<i class="fas ${icon}"></i><span>Theme</span>`;
+            },
+            renderItemCard(item, index) {
+                const card = document.createElement('div');
+                card.className = 'item-card item-card-enter';
+                card.dataset.id = item.id;
+                card.style.animationDelay = `${index * 50}ms`;
+                const category = STATE.categories.find(c => c.id === item.category) || {};
+                card.innerHTML = `
+                    <div class="item-icon"><i class="fas fa-${category.icon || 'box'}"></i></div>
                     <div class="item-details">
                         <div class="item-name">${item.name}</div>
                         <div class="item-meta">
                             <span>${(item.weight * item.quantity).toFixed(1)} kg</span>
-                            <span>${item.quantity}x</span>
-                            <span class="item-category">${getCategoryName(item.category)}</span>
+                            <span class="item-category">${category.name || 'Other'}</span>
                         </div>
                     </div>
-                    <div class="item-actions">
-                        <div class="action-btn skip-btn" data-action="skip"><i class="fas fa-times"></i></div>
-                        <div class="action-btn pack-btn" data-action="pack"><i class="fas fa-check"></i></div>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Set up swipe/drag events
-            setupSwipeCards();
-        }
-
-        // Get category name by ID
-        function getCategoryName(categoryId) {
-            const category = categories.find(cat => cat.id === categoryId);
-            return category ? category.name : 'Other';
-        }
-
-        // Set up swipe/drag functionality for item cards
-        function setupSwipeCards() {
-            const cards = document.querySelectorAll('.item-card');
-            cards.forEach(card => {
-                let startX, moveX;
-                let isDragging = false;
-                
-                card.addEventListener('touchstart', handleTouchStart, { passive: false });
-                card.addEventListener('touchmove', handleTouchMove, { passive: false });
-                card.addEventListener('touchend', handleTouchEnd);
-                
-                card.addEventListener('mousedown', handleMouseDown);
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', handleMouseUp);
-                
-                // Click events for action buttons
-                const skipBtn = card.querySelector('.skip-btn');
-                const packBtn = card.querySelector('.pack-btn');
-                
-                skipBtn.addEventListener('click', () => handleItemAction(card, 'skip'));
-                packBtn.addEventListener('click', () => handleItemAction(card, 'pack'));
-                
-                function handleTouchStart(e) {
-                    startX = e.touches[0].clientX;
-                    isDragging = true;
-                    card.style.transition = 'none';
-                }
-                
-                function handleTouchMove(e) {
-                    if (!isDragging) return;
-                    e.preventDefault();
-                    moveX = e.touches[0].clientX - startX;
-                    
-                    // Limit the movement to prevent excessive dragging
-                    const maxMove = 150;
-                    const boundedMoveX = Math.max(-maxMove, Math.min(maxMove, moveX));
-                    
-                    // Calculate rotation based on movement (more subtle)
-                    const rotation = boundedMoveX / 20;
-                    
-                    // Calculate opacity based on movement
-                    const opacity = 1 - Math.min(0.5, Math.abs(boundedMoveX) / maxMove * 0.5);
-                    
-                    card.style.transform = `translateX(${boundedMoveX}px) rotate(${rotation}deg)`;
-                    card.style.opacity = opacity;
-                    
-                    // Change background color based on drag direction
-                    if (boundedMoveX > 50) {
-                        card.style.backgroundColor = 'rgba(76, 201, 240, 0.2)';
-                    } else if (boundedMoveX < -50) {
-                        card.style.backgroundColor = 'rgba(247, 37, 133, 0.2)';
-                    } else {
-                        card.style.backgroundColor = '';
-                    }
-                }
-                
-                function handleTouchEnd() {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    
-                    // Reset transition
-                    card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-                    
-                    // Determine if swipe threshold was reached
-                    if (Math.abs(moveX) > 100) {
-                        const action = moveX > 0 ? 'pack' : 'skip';
-                        handleItemAction(card, action);
-                    } else {
-                        // Return to original position
-                        card.style.transform = '';
-                        card.style.opacity = '1';
-                        card.style.backgroundColor = '';
-                    }
-                }
-                
-                function handleMouseDown(e) {
-                    startX = e.clientX;
-                    isDragging = true;
-                    card.style.cursor = 'grabbing';
-                    card.style.transition = 'none';
-                }
-                
-                function handleMouseMove(e) {
-                    if (!isDragging) return;
-                    moveX = e.clientX - startX;
-                    
-                    // Limit the movement
-                    const maxMove = 150;
-                    const boundedMoveX = Math.max(-maxMove, Math.min(maxMove, moveX));
-                    const rotation = boundedMoveX / 20;
-                    const opacity = 1 - Math.min(0.5, Math.abs(boundedMoveX) / maxMove * 0.5);
-                    
-                    card.style.transform = `translateX(${boundedMoveX}px) rotate(${rotation}deg)`;
-                    card.style.opacity = opacity;
-                    
-                    if (boundedMoveX > 50) {
-                        card.style.backgroundColor = 'rgba(76, 201, 240, 0.2)';
-                    } else if (boundedMoveX < -50) {
-                        card.style.backgroundColor = 'rgba(247, 37, 133, 0.2)';
-                    } else {
-                        card.style.backgroundColor = '';
-                    }
-                }
-                
-                function handleMouseUp() {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    card.style.cursor = 'grab';
-                    card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-                    
-                    if (Math.abs(moveX) > 100) {
-                        const action = moveX > 0 ? 'pack' : 'skip';
-                        handleItemAction(card, action);
-                    } else {
-                        card.style.transform = '';
-                        card.style.opacity = '1';
-                        card.style.backgroundColor = '';
-                    }
-                }
-            });
-        }
-
-        // Handle pack/skip action for an item
-        function handleItemAction(card, action) {
-            const itemId = parseInt(card.getAttribute('data-id'));
-            const item = state.items.find(item => item.id === itemId);
-            
-            // Store the last action for undo
-            state.lastAction = {
-                item: {...item},
-                action,
-                timestamp: Date.now()
-            };
-            
-            if (action === 'pack') {
-                // Add to packed items
-                state.packedItems.push(item);
-                state.currentWeight += item.weight * item.quantity;
-                
-                // Remove from main list
-                state.items = state.items.filter(i => i.id !== itemId);
-                
-                // Add animation class
-                card.classList.add('swipe-right');
-                
-                // Show undo notification
-                showUndoNotification(`${item.name} packed`);
-            } else {
-                // Skip - just remove from list
-                state.items = state.items.filter(i => i.id !== itemId);
-                
-                // Add animation class
-                card.classList.add('swipe-left');
-                
-                // Show undo notification
-                showUndoNotification(`${item.name} skipped`);
-            }
-            
-            // Update UI after animation completes
-            setTimeout(() => {
-                updateWeightDisplay();
-                renderPackedItems();
-                updateCategoryCounts();
-                renderItemCards();
-                updateUndoButton();
-                updateShareLink();
-            }, 300);
-        }
-
-        // Show undo notification
-        function showUndoNotification(message) {
-            const notification = elements.undoNotification;
-            notification.querySelector('span').textContent = message;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        // Update undo button visibility
-        function updateUndoButton() {
-            if (state.lastAction) {
-                elements.undoBtn.style.display = 'flex';
-            } else {
-                elements.undoBtn.style.display = 'none';
-            }
-        }
-
-        // Undo the last action
-        function undoLastAction() {
-            if (!state.lastAction) return;
-            
-            const { item, action } = state.lastAction;
-            
-            if (action === 'pack') {
-                // Remove from packed items
-                state.packedItems = state.packedItems.filter(i => i.id !== item.id);
-                state.currentWeight -= item.weight * item.quantity;
-                
-                // Add back to main list
-                state.items.unshift(item);
-            } else {
-                // Add back to main list
-                state.items.unshift(item);
-            }
-            
-            // Clear the last action
-            state.lastAction = null;
-            
-            // Update UI
-            updateWeightDisplay();
-            renderPackedItems();
-            updateCategoryCounts();
-            renderItemCards();
-            updateUndoButton();
-            updateShareLink();
-        }
-
-        // Update weight display and progress bar
-        function updateWeightDisplay() {
-            if (!elements.weightProgress || !elements.currentWeight) return;
-            
-            elements.currentWeight.textContent = state.currentWeight.toFixed(1);
-            
-            // Calculate progress percentage (capped at 100%)
-            const percentage = Math.min(100, (state.currentWeight / state.maxWeight) * 100);
-            elements.weightProgress.style.width = `${percentage}%`;
-            
-            // Update progress bar color based on thresholds
-            if (state.currentWeight > state.maxWeight) {
-                elements.weightProgress.style.backgroundColor = 'var(--danger)';
-            } else if (state.currentWeight > state.warningThreshold) {
-                elements.weightProgress.style.backgroundColor = 'var(--warning)';
-            } else {
-                elements.weightProgress.style.backgroundColor = 'var(--success)';
-            }
-        }
-
-        // Render packed items list
-        function renderPackedItems() {
-            elements.packedItems.innerHTML = state.packedItems.map(item => `
-                <div class="packed-item">
-                    <div>
-                        <i class="fas fa-${item.icon}"></i>
-                        <span>${item.name} (${item.quantity}x)</span>
-                    </div>
-                    <div>${(item.weight * item.quantity).toFixed(1)} kg</div>
-                </div>
-            `).join('');
-        }
-
-        // Update category counts
-        function updateCategoryCounts() {
-            const categoryCards = document.querySelectorAll('.category-card');
-            
-            categoryCards.forEach(card => {
-                const categoryId = card.getAttribute('data-category');
-                
-                // Count packed vs total items in this category
-                const packedCount = state.packedItems.filter(item => item.category === categoryId).length;
-                const totalCount = [...state.items, ...state.packedItems].filter(item => item.category === categoryId).length;
-                
-                // Update count display
-                const countElement = card.querySelector('.category-count');
-                countElement.textContent = `${packedCount}/${totalCount}`;
-                
-                // Highlight if all items are packed
-                if (totalCount > 0 && packedCount === totalCount) {
-                    card.style.backgroundColor = 'rgba(76, 201, 240, 0.2)';
+                    <div class="quantity-controls">
+                        <button class="quantity-btn decrease-qty" data-id="${item.id}">-</button>
+                        <span class="quantity-display">${item.quantity}</span>
+                        <button class="quantity-btn increase-qty" data-id="${item.id}">+</button>
+                    </div>`;
+                return card;
+            },
+            renderAllItems() {
+                DOM.itemsContainer.innerHTML = '';
+                if (STATE.items.length === 0) {
+                    DOM.itemsContainer.innerHTML = '<p>All items have been sorted!</p>';
                 } else {
-                    card.style.backgroundColor = '';
+                    STATE.items.forEach((item, index) => {
+                        DOM.itemsContainer.appendChild(this.renderItemCard(item, index));
+                    });
                 }
-            });
-        }
-
-        // Update destination info based on input
-        function updateDestinationInfo() {
-            const destination = elements.destination.value.toLowerCase();
-            let tips = destinationTips.default;
-            
-            // Find matching destination tips
-            for (const [key, value] of Object.entries(destinationTips)) {
-                if (destination.includes(key)) {
-                    tips = value;
-                    break;
-                }
-            }
-            
-            // Render tips
-            elements.travelInfo.innerHTML = `
-                <div class="info-item">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Packing tips for ${destination || 'your destination'}:</span>
-                </div>
-                ${tips.map(tip => `
-                    <div class="info-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>${tip}</span>
-                    </div>
-                `).join('')}
-            `;
-            
-            // Fetch weather and currency if destination is specified
-            if (destination) {
-                fetchWeather(destination.split(',')[0].trim());
-                updateCurrencyInfo(destination.split(',')[0].trim());
-            } else {
-                elements.weatherWidget.innerHTML = '';
-                elements.currencyWidget.innerHTML = '';
-            }
-        }
-
-        // Update currency information
-        function updateCurrencyInfo(city) {
-            const cityKey = city.toLowerCase();
-            let currencyCode = DESTINATION_CURRENCIES.default;
-            
-            // Find matching currency code
-            for (const [key, value] of Object.entries(DESTINATION_CURRENCIES)) {
-                if (cityKey.includes(key)) {
-                    currencyCode = value;
-                    break;
-                }
-            }
-            
-            const rate = RECENT_EXCHANGE_RATES[currencyCode] || RECENT_EXCHANGE_RATES['USD'];
-            const symbol = CURRENCY_SYMBOLS[currencyCode] || currencyCode;
-            
-            elements.currencyWidget.innerHTML = `
-                <div class="currency-header">
-                    <i class="fas fa-money-bill-wave currency-icon"></i>
-                    <span class="currency-rate">1 ${currencyCode} ≈ ${(1/rate).toFixed(2)} INR</span>
-                </div>
-                <div class="currency-info">
-                    <p>• Local currency: ${currencyCode} (${symbol})</p>
-                    <p>• Approximate exchange rate</p>
-                    <p>• 1 INR ≈ ${rate.toFixed(4)} ${currencyCode}</p>
-                </div>
-            `;
-        }
-
-        // Fetch weather data
-        async function fetchWeather(city) {
-            // In a real app, you would call a weather API here
-            // This is a mock implementation for demonstration
-            
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Mock weather data
-            const mockWeather = {
-                temp: Math.round(Math.random() * 30 - 5), // Random temp between -5 and 25
-                conditions: ['Sunny', 'Cloudy', 'Rainy', 'Snowy'][Math.floor(Math.random() * 4)],
-                icon: ['sun', 'cloud', 'cloud-rain', 'snowflake'][Math.floor(Math.random() * 4)]
-            };
-            
-            renderWeatherWidget(mockWeather);
-        }
-
-        // Render weather widget
-        function renderWeatherWidget(weatherData) {
-            elements.weatherWidget.innerHTML = `
-                <div class="weather-header">
-                    <i class="fas fa-${weatherData.icon} weather-icon"></i>
-                    <span class="weather-temp">${weatherData.temp}°C</span>
-                    <span>${weatherData.conditions}</span>
-                </div>
-                <div class="weather-recommendations">
-                    ${getWeatherRecommendations(weatherData.conditions, weatherData.temp)}
-                </div>
-            `;
-        }
-
-        // Get weather recommendations
-        function getWeatherRecommendations(conditions, temp) {
-            let recommendations = [];
-            
-            if (temp < 10) {
-                recommendations.push('Pack warm layers and a heavy jacket');
-            } else if (temp > 25) {
-                recommendations.push('Pack light clothing and sunscreen');
-            }
-            
-            if (conditions.toLowerCase().includes('rain')) {
-                recommendations.push('Bring a waterproof jacket and umbrella');
-            } else if (conditions.toLowerCase().includes('snow')) {
-                recommendations.push('Pack waterproof boots and thermal wear');
-            }
-            
-            return recommendations.map(r => `<p>• ${r}</p>`).join('');
-        }
-
-        // Add custom item
-        function addCustomItem() {
-            const name = document.getElementById('itemName').value.trim();
-            const category = document.getElementById('itemCategory').value;
-            const weight = parseFloat(document.getElementById('itemWeight').value) || 0.1;
-            const quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
-            
-            if (!name) {
-                alert('Please enter an item name');
-                return;
-            }
-            
-            // Create new item
-            const newItem = {
-                id: Date.now(), // Use timestamp as temporary ID
-                name,
-                category,
-                icon: getIconForCategory(category),
-                weight,
-                quantity
-            };
-            
-            // Add to items list
-            state.items.unshift(newItem);
-            
-            // Close modal and refresh
-            closeModal('addItemModal');
-            renderItemCards();
-            updateCategoryCounts();
-            updateShareLink();
-            
-            // Reset form
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemWeight').value = '0.5';
-            document.getElementById('itemQuantity').value = '1';
-        }
-
-        // Get appropriate icon for category
-        function getIconForCategory(category) {
-            const cat = categories.find(c => c.id === category);
-            return cat ? cat.icon : 'ellipsis-h';
-        }
-
-        // Open modal
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-            
-            // Focus on first input if exists
-            const input = document.querySelector(`#${modalId} input`);
-            if (input) input.focus();
-        }
-
-        // Close modal
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        // Handle AI assistant questions
-        function handleAIQuestion() {
-            const question = elements.aiQuestion.value.trim();
-            
-            if (!question) return;
-            
-            // Add user question to chat
-            addChatMessage('user', question);
-            elements.aiQuestion.value = '';
-            
-            // Generate AI response
-            setTimeout(() => {
-                const response = generateAIResponse(question);
-                addChatMessage('ai', response);
-            }, 500);
-        }
-
-        // Add message to chat
-        function addChatMessage(sender, message) {
-            const messageClass = sender === 'user' ? 'ai-message' : 'ai-response';
-            const icon = sender === 'user' ? 'user' : 'robot';
-            
-            const messageElement = document.createElement('div');
-            messageElement.className = messageClass;
-            messageElement.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <i class="fas fa-${icon}"></i>
-                    <strong>${sender === 'user' ? 'You' : 'PackPal'}</strong>
-                </div>
-                <p>${message}</p>
-            `;
-            
-            elements.aiChat.appendChild(messageElement);
-            elements.aiChat.scrollTop = elements.aiChat.scrollHeight;
-            
-            // Add to chat history
-            state.aiChatHistory.push({ sender, message });
-        }
-
-        // Generate AI response
-        function generateAIResponse(question) {
-            const lowerQuestion = question.toLowerCase();
-            const destination = elements.destination.value || 'your destination';
-            const airline = document.getElementById('airline').value || 'your airline';
-            const duration = document.getElementById('duration').value || 'a few';
-            
-            // Simple response logic - in a real app this would call an API
-            if (lowerQuestion.includes('weather') || lowerQuestion.includes('climate')) {
-                return `For ${destination}, check the weather forecast before packing. Based on typical conditions, you might need: 
-                ${getWeatherRecommendations('', 15)}`;
-            } else if (lowerQuestion.includes('airline') || lowerQuestion.includes('baggage')) {
-                return `For ${airline}, the standard checked baggage allowance is ${getBaggageAllowanceText()}. 
-                Always check the airline's website for the most up-to-date policies.`;
-            } else if (lowerQuestion.includes('essential') || lowerQuestion.includes('must pack')) {
-                return `For ${destination}, essential items include:\n
-                - Travel documents (passport, tickets)\n
-                - Medications\n
-                - Phone charger\n
-                - Credit cards and some cash\n
-                - Basic toiletries`;
-            } else if (lowerQuestion.includes('template') || lowerQuestion.includes('save')) {
-                return `Packing templates aren't available yet, but will be coming soon! 
-                You'll be able to save lists like "Business Trip" or "Beach Vacation" for quick reuse.`;
-            } else if (lowerQuestion.includes('how many') || lowerQuestion.includes('quantity')) {
-                return `For a ${duration}-day trip, I recommend:\n
-                - ${duration} shirts\n
-                - ${Math.ceil(duration / 2)} pants\n
-                - ${duration + 2} pairs of underwear/socks\n
-                Adjust based on laundry plans and activities.`;
-            } else {
-                return `I'm not sure about that. Try asking about:\n
-                - Weather-appropriate clothing\n
-                - Airline baggage rules\n
-                - Essential items to pack\n
-                - Quantity recommendations`;
-            }
-        }
-
-        // Get baggage allowance text for AI response
-        function getBaggageAllowanceText() {
-            const airline = elements.airline.value;
-            const travelClass = elements.class.value;
-            
-            if (airline && airlineBaggageAllowances[airline]) {
-                const allowance = airlineBaggageAllowances[airline][travelClass] || 23;
-                return `${allowance}kg in ${travelClass} class`;
-            }
-            return '23kg in economy class';
-        }
-
-        // Handle quick questions
-        function handleQuickQuestion(question) {
-            elements.aiQuestion.value = question;
-            handleAIQuestion();
-        }
-
-        // Export packing list as text
-        function exportToText() {
-            let text = `Packing List for ${elements.destination.value || 'Your Trip'}\n\n`;
-            text += `Total weight: ${state.currentWeight.toFixed(1)}/${state.maxWeight}kg\n\n`;
-            text += `Packed Items:\n`;
-            
-            state.packedItems.forEach(item => {
-                text += `- ${item.quantity}x ${item.name} (${(item.weight * item.quantity).toFixed(1)}kg)\n`;
-            });
-            
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Packing list copied to clipboard!');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                alert('Could not copy to clipboard. Please try again.');
-            });
-        }
-
-        // Export packing list as PDF
-        async function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF();
-            
-            // Add title
-            pdf.setFontSize(20);
-            pdf.text(`Packing List for ${elements.destination.value || 'Your Trip'}`, 10, 20);
-            
-            // Add weight info
-            pdf.setFontSize(12);
-            pdf.text(`Total weight: ${state.currentWeight.toFixed(1)}/${state.maxWeight}kg`, 10, 30);
-            
-            // Add packed items
-            pdf.setFontSize(14);
-            pdf.text('Packed Items:', 10, 40);
-            
-            let yPosition = 50;
-            state.packedItems.forEach(item => {
-                pdf.setFontSize(12);
-                pdf.text(`- ${item.quantity}x ${item.name} (${(item.weight * item.quantity).toFixed(1)}kg)`, 10, yPosition);
-                yPosition += 7;
+                this.updateStatus();
+            },
+            renderCategories() {
+                DOM.categoriesGrid.innerHTML = STATE.categories.map(cat => `
+                    <div class="category-card" data-category="${cat.id}">
+                        <div class="category-icon"><i class="fas fa-${cat.icon}"></i></div>
+                        <div class="category-name">${cat.name}</div>
+                        <div class="category-count">0/0</div>
+                    </div>`).join('');
+            },
+            populateCategorySelect() {
+                DOM.itemCategorySelect.innerHTML = STATE.categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+            },
+            updateStatus() {
+                const totalWeight = STATE.packedItems.reduce((sum, item) => sum + (item.weight * item.quantity), 0);
+                const maxWeight = parseFloat(DOM.maxWeight.textContent);
+                DOM.currentWeight.textContent = totalWeight.toFixed(1);
+                const progress = Math.min(1, totalWeight / maxWeight);
+                DOM.suitcaseFill.style.transform = `scaleY(${progress})`;
                 
-                // Add new page if needed
-                if (yPosition > 280) {
-                    pdf.addPage();
-                    yPosition = 20;
+                let color = 'var(--primary-color)';
+                if (progress > 0.7 && progress < 0.9) {
+                    color = 'var(--warning-color)';
+                } else if (progress >= 0.9) {
+                    color = 'var(--danger-color)';
                 }
-            });
-            
-            // Save the PDF
-            pdf.save('packing-list.pdf');
-        }
+                DOM.suitcaseFill.style.setProperty('--suitcase-fill-color', color);
 
-        // Prepare visual export
-        function prepareVisualExport() {
-            // Update export content with current data
-            elements.exportDestination.textContent = elements.destination.value || 'Not specified';
-            elements.exportDuration.textContent = `${document.getElementById('duration').value || 7} days`;
-            elements.exportTravelers.textContent = document.getElementById('travelers').value || 1;
-            elements.exportTotalWeight.textContent = `${state.currentWeight.toFixed(1)}/${state.maxWeight} kg`;
-            
-            // Update packed items list
-            elements.exportItemsList.innerHTML = state.packedItems.map(item => `
-                <div class="export-item">
-                    <span>${item.quantity}x ${item.name}</span>
-                    <span>${(item.weight * item.quantity).toFixed(1)} kg</span>
-                </div>
-            `).join('');
-            
-            // Open the modal
-            openModal('visualExportModal');
-        }
+                DOM.suitcaseSvg.classList.toggle('full', progress >= 1);
 
-        // Download visual export as image
-        async function downloadVisualExport() {
-            try {
-                const canvas = await html2canvas(elements.visualExportContent);
-                const link = document.createElement('a');
-                link.download = 'packing-list.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            } catch (error) {
-                console.error('Error generating image:', error);
-                alert('Could not generate image. Please try again.');
-            }
-        }
-
-        // Update share link
-        function updateShareLink() {
-            if (!state.tripId) return;
-            
-            const link = `${window.location.origin}${window.location.pathname}?trip=${state.tripId}`;
-            elements.shareLink.value = link;
-        }
-
-        // Load trip from URL
-        function loadTripFromURL() {
-            const params = new URLSearchParams(window.location.search);
-            const tripId = params.get('trip');
-            
-            if (tripId) {
-                // In a real app, you would fetch the trip data from a database
-                // For now, we'll just show a message
-                alert(`Loading shared trip ${tripId}. In a real app, this would fetch the trip data.`);
-                state.tripId = tripId;
-                updateShareLink();
-            }
-        }
-
-        // Set up event listeners
-        function setupEventListeners() {
-            // Theme toggle
-            elements.themeToggle.addEventListener('click', toggleTheme);
-            elements.mobileTheme.addEventListener('click', (e) => {
-                e.preventDefault();
-                toggleTheme();
-            });
-			
-			// Add listeners for baggage allowance factors
-            elements.travelers.addEventListener('change', updateBaggageAllowance);
-            elements.airline.addEventListener('change', updateBaggageAllowance);
-            elements.class.addEventListener('change', updateBaggageAllowance);
-            
-            // Generate packing list
-            elements.generateBtn.addEventListener('click', generatePackingList);
-            elements.mobileGenerate.addEventListener('click', (e) => {
-                e.preventDefault();
-                generatePackingList();
-            });
-            
-            // Destination input
-            elements.destination.addEventListener('input', updateDestinationInfo);
-            
-            // Add item modal
-            elements.addItemBtn.addEventListener('click', () => openModal('addItemModal'));
-            elements.closeAddItemModal.addEventListener('click', () => closeModal('addItemModal'));
-            elements.saveItemBtn.addEventListener('click', addCustomItem);
-            
-            // AI modal
-            elements.aiAssistantBtn.addEventListener('click', () => openModal('aiModal'));
-            elements.mobileAI.addEventListener('click', (e) => {
-                e.preventDefault();
-                openModal('aiModal');
-            });
-            elements.closeAIModal.addEventListener('click', () => closeModal('aiModal'));
-            elements.sendQuestion.addEventListener('click', handleAIQuestion);
-            elements.aiQuestion.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleAIQuestion();
-            });
-            
-            // Quick questions
-            elements.quickQuestions.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    handleQuickQuestion(btn.getAttribute('data-question'));
+                STATE.categories.forEach(cat => {
+                    const totalInCat = [...STATE.items, ...STATE.packedItems].reduce((sum, i) => i.category === cat.id ? sum + i.quantity : sum, 0);
+                    const packedInCat = STATE.packedItems.reduce((sum, i) => i.category === cat.id ? sum + i.quantity : sum, 0);
+                    const countEl = DOM.categoriesGrid.querySelector(`[data-category="${cat.id}"] .category-count`);
+                    if (countEl && countEl.textContent !== `${packedInCat}/${totalInCat}`) {
+                        countEl.textContent = `${packedInCat}/${totalInCat}`;
+                        countEl.classList.add('updated');
+                        setTimeout(() => countEl.classList.remove('updated'), 500);
+                    }
                 });
-            });
-            
-            // Undo functionality
-            elements.undoBtn.addEventListener('click', undoLastAction);
-            elements.undoActionBtn.addEventListener('click', () => {
-                undoLastAction();
-                elements.undoNotification.classList.remove('show');
-            });
-            
-            // Share functionality
-            elements.shareBtn.addEventListener('click', () => openModal('shareModal'));
-            elements.mobileShare.addEventListener('click', (e) => {
-                e.preventDefault();
-                openModal('shareModal');
-            });
-            elements.closeShareModal.addEventListener('click', () => closeModal('shareModal'));
-            elements.copyLinkBtn.addEventListener('click', () => {
-                elements.shareLink.select();
-                document.execCommand('copy');
-                alert('Link copied to clipboard!');
-            });
-            
-            // Export functionality
-            elements.exportTextBtn.addEventListener('click', exportToText);
-            elements.exportPdfBtn.addEventListener('click', exportToPDF);
-            elements.exportVisualBtn.addEventListener('click', prepareVisualExport);
-            elements.exportTextModalBtn.addEventListener('click', exportToText);
-            elements.exportPdfModalBtn.addEventListener('click', exportToPDF);
-            elements.exportVisualModalBtn.addEventListener('click', prepareVisualExport);
-            elements.downloadVisualBtn.addEventListener('click', downloadVisualExport);
-            elements.closeVisualModal.addEventListener('click', () => closeModal('visualExportModal'));
-            
-            // Close modals when clicking outside
-            window.addEventListener('click', (e) => {
-                if (e.target === elements.addItemModal) {
-                    closeModal('addItemModal');
-                }
-                if (e.target === elements.aiModal) {
-                    closeModal('aiModal');
-                }
-                if (e.target === elements.shareModal) {
-                    closeModal('shareModal');
-                }
-                if (e.target === elements.visualExportModal) {
-                    closeModal('visualExportModal');
-                }
-            });
-        }
+            },
+            updateTravelInfo() {
+                const intel = DATA.getIntel();
+                const toInrRate = intel.rate.toFixed(2);
+                const fromInrRate = (1 / intel.rate).toFixed(4);
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', init);
+                DOM.travelInfoContainer.innerHTML = `
+                    ${intel.tips.map(tip => `
+                        <div class="info-item">
+                            <i class="fas fa-info-circle"></i>
+                            <div class="info-item-content"><p>${tip}</p></div>
+                        </div>`).join('')}
+                    <div class="currency-widget">
+                         <div class="info-item">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <div class="info-item-content">
+                                <h4>Currency</h4>
+                                <p><strong>1 ${intel.currency} ≈ ${toInrRate} INR</strong></p>
+                                <ul>
+                                    <li>• Local currency: ${intel.currency} (${intel.symbol})</li>
+                                    <li>• 1 INR ≈ ${fromInrRate} ${intel.currency}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>`;
+            },
+            toggleModal(modalId, show) { document.getElementById(modalId)?.classList.toggle('active', show); },
+            showUndo(action) {
+                STATE.lastAction = action;
+                DOM.undoNotification.classList.add('show');
+                setTimeout(() => DOM.undoNotification.classList.remove('show'), 4000);
+            },
+        };
+
+        // --- 5. APP LOGIC ---
+        const APP = {
+            init() { UI.init(); this.loadTheme(); this.setupEventListeners(); this.updateWeightAllowance(); },
+            loadTheme() {
+                const theme = localStorage.getItem('packpal-theme') || 'light';
+                STATE.theme = theme;
+                UI.applyTheme(theme);
+            },
+            toggleTheme() {
+                STATE.theme = STATE.theme === 'light' ? 'dark' : 'light';
+                localStorage.setItem('packpal-theme', STATE.theme);
+                UI.applyTheme(STATE.theme);
+            },
+            generateList() {
+                Object.assign(STATE.tripDetails, {
+                    destination: DOM.destinationInput.value,
+                    duration: parseInt(DOM.durationInput.value),
+                    season: DOM.seasonSelect.value,
+                    activities: DOM.activitiesInput.value
+                });
+                if (!STATE.tripDetails.destination) return alert("Please enter a destination.");
+                STATE.items = DATA.generate().map(item => ({ ...item, id: Date.now() + Math.random(), packed: false }));
+                STATE.packedItems = [];
+                UI.renderAllItems();
+                UI.updateTravelInfo();
+            },
+            addCustomItem() {
+                const name = DOM.itemNameInput.value.trim();
+                const category = DOM.itemCategorySelect.value;
+                const weight = parseFloat(DOM.itemWeightInput.value);
+                const quantity = parseInt(DOM.itemQuantityInput.value);
+                if (!name || !quantity) return;
+                const newItem = { id: Date.now(), name, category, weight, quantity, packed: false };
+                STATE.items.unshift(newItem);
+                UI.renderAllItems();
+                UI.toggleModal('addItemModal', false);
+                DOM.itemNameInput.value = '';
+                DOM.itemQuantityInput.value = '1';
+            },
+            handleItemAction(id, action) {
+                const itemIndex = STATE.items.findIndex(i => i.id === id);
+                if (itemIndex === -1) return;
+                const [item] = STATE.items.splice(itemIndex, 1);
+                if (action === 'pack') STATE.packedItems.push(item);
+                UI.showUndo({ item, from: action });
+                UI.renderAllItems();
+            },
+            updateItemQuantity(id, change) {
+                const item = STATE.items.find(i => i.id === id);
+                if (item) {
+                    item.quantity = Math.max(1, item.quantity + change);
+                    UI.renderAllItems();
+                }
+            },
+            undoLastAction() {
+                if (!STATE.lastAction) return;
+                const { item, from } = STATE.lastAction;
+                if (from === 'pack') {
+                    const packedIndex = STATE.packedItems.findIndex(i => i.id === item.id);
+                    if (packedIndex > -1) STATE.packedItems.splice(packedIndex, 1);
+                }
+                STATE.items.unshift(item);
+                STATE.lastAction = null;
+                DOM.undoNotification.classList.remove('show');
+                UI.renderAllItems();
+            },
+            updateWeightAllowance() {
+                const travelers = parseInt(DOM.travelersInput.value) || 1;
+                const airline = DOM.airlineSelect.value;
+                const travelClass = DOM.classSelect.value;
+                const allowancePerPerson = DATA.airlineAllowances[airline]?.[travelClass] || DATA.airlineAllowances.default.economy;
+                const totalAllowance = allowancePerPerson * travelers;
+                DOM.maxWeight.textContent = totalAllowance.toFixed(1);
+                UI.updateStatus();
+            },
+            exportAs(type) {
+                const listText = STATE.packedItems.map(i => `- ${i.name} (x${i.quantity}) - ${ (i.weight * i.quantity).toFixed(1)}kg`).join('\n');
+                const totalWeight = STATE.packedItems.reduce((sum, item) => sum + (item.weight * item.quantity), 0);
+                const fullText = `Packing List for ${STATE.tripDetails.destination}\nTotal Weight: ${totalWeight.toFixed(1)}kg\n\n${listText}`;
+                if (type === 'text') {
+                    navigator.clipboard.writeText(fullText).then(() => alert('Copied to clipboard!'));
+                } else if (type === 'image') {
+                    const listContainer = document.querySelector('.main-content .panel');
+                    html2canvas(listContainer).then(canvas => {
+                        const link = document.createElement('a');
+                        link.download = `PackPal-${STATE.tripDetails.destination}.png`;
+                        link.href = canvas.toDataURL();
+                        link.click();
+                    });
+                }
+            },
+            async exportStyledPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const { destination, duration, season, activities } = STATE.tripDetails;
+                doc.setFontSize(22);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(STATE.theme === 'dark' ? '#4895ef' : '#4361ee');
+                doc.text("PackPal Packing List", 105, 20, { align: 'center' });
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(STATE.theme === 'dark' ? '#e0e0e0' : '#212529');
+                doc.text(`Destination: ${destination}`, 20, 40);
+                doc.text(`Duration: ${duration} days (${season})`, 20, 47);
+                doc.text(`Activities: ${activities || 'General'}`, 20, 54);
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "bold");
+                doc.text("Packed Items", 20, 70);
+                doc.setLineWidth(0.5);
+                doc.line(20, 72, 190, 72);
+                let y = 80;
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "normal");
+                STATE.packedItems.forEach(item => {
+                    if (y > 270) { doc.addPage(); y = 20; }
+                    const category = STATE.categories.find(c => c.id === item.category)?.name || 'Other';
+                    doc.text(`- ${item.name} (x${item.quantity})`, 25, y);
+                    doc.text(`${(item.weight * item.quantity).toFixed(1)} kg`, 185, y, { align: 'right' });
+                    y += 8;
+                });
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(10);
+                    doc.setTextColor(150);
+                    doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+                }
+                doc.save(`PackPal-${destination}.pdf`);
+            },
+            handleSwipe(e) {
+                if (!STATE.swipeState.isDragging || !STATE.swipeState.target) return;
+                const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+                const diffX = currentX - STATE.swipeState.startX;
+                STATE.swipeState.target.style.transform = `translateX(${diffX}px) rotate(${diffX / 20}deg)`;
+                if (diffX > 20) {
+                    STATE.swipeState.target.classList.add('swiping-right');
+                    STATE.swipeState.target.classList.remove('swiping-left');
+                } else if (diffX < -20) {
+                    STATE.swipeState.target.classList.add('swiping-left');
+                    STATE.swipeState.target.classList.remove('swiping-right');
+                } else {
+                    STATE.swipeState.target.classList.remove('swiping-right', 'swiping-left');
+                }
+            },
+            endSwipe() {
+                if (!STATE.swipeState.isDragging || !STATE.swipeState.target) return;
+                const card = STATE.swipeState.target;
+                const diffX = STATE.swipeState.currentX - STATE.swipeState.startX;
+                const threshold = card.offsetWidth * 0.4;
+                if (Math.abs(diffX) > threshold) {
+                    card.classList.add(diffX > 0 ? 'swipe-right' : 'swipe-left');
+                    setTimeout(() => {
+                        const id = Number(card.dataset.id);
+                        this.handleItemAction(id, diffX > 0 ? 'pack' : 'skip');
+                    }, 300);
+                } else {
+                    card.style.transform = '';
+                }
+                card.classList.remove('dragging', 'swiping-left', 'swiping-right');
+                STATE.swipeState.isDragging = false;
+                STATE.swipeState.target = null;
+            },
+            setupEventListeners() {
+                DOM.themeToggle.addEventListener('click', () => this.toggleTheme());
+                DOM.mobileTheme.addEventListener('click', (e) => { e.preventDefault(); this.toggleTheme(); });
+                DOM.generateBtn.addEventListener('click', () => this.generateList());
+                
+                // Dynamic weight allowance listeners
+                [DOM.travelersInput, DOM.classSelect, DOM.airlineSelect].forEach(el => {
+                    el.addEventListener('change', () => this.updateWeightAllowance());
+                });
+                
+                // Searchable Destination Logic
+                DOM.destinationInput.addEventListener('input', () => {
+                    const searchTerm = DOM.destinationInput.value.toLowerCase();
+                    const results = Object.keys(DATA.countryData).filter(country => 
+                        country.toLowerCase().includes(searchTerm) && country !== 'default'
+                    );
+                    
+                    DOM.destinationResults.innerHTML = '';
+                    if (results.length > 0 && searchTerm.length > 0) {
+                        DOM.destinationResults.classList.remove('hidden');
+                        results.forEach(country => {
+                            const item = document.createElement('div');
+                            item.className = 'autocomplete-item';
+                            item.textContent = country;
+                            item.addEventListener('click', () => {
+                                DOM.destinationInput.value = country;
+                                DOM.destinationResults.classList.add('hidden');
+                            });
+                            DOM.destinationResults.appendChild(item);
+                        });
+                    } else {
+                        DOM.destinationResults.classList.add('hidden');
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.form-group')) {
+                        DOM.destinationResults.classList.add('hidden');
+                    }
+                });
+
+                DOM.itemsContainer.addEventListener('pointerdown', e => {
+                    if (e.target.closest('.quantity-btn')) return; // Prevent swipe when clicking quantity
+                    const card = e.target.closest('.item-card');
+                    if (card) {
+                        card.setPointerCapture(e.pointerId);
+                        STATE.swipeState.isDragging = true;
+                        STATE.swipeState.target = card;
+                        STATE.swipeState.startX = e.clientX;
+                        card.classList.add('dragging');
+                    }
+                });
+                document.addEventListener('pointermove', e => {
+                    if (STATE.swipeState.isDragging) {
+                        STATE.swipeState.currentX = e.clientX;
+                        this.handleSwipe(e);
+                    }
+                });
+                document.addEventListener('pointerup', () => this.endSwipe());
+                document.addEventListener('pointercancel', () => this.endSwipe());
+
+                DOM.itemsContainer.addEventListener('click', e => {
+                    const target = e.target;
+                    if (target.matches('.increase-qty')) {
+                        this.updateItemQuantity(Number(target.dataset.id), 1);
+                    } else if (target.matches('.decrease-qty')) {
+                        this.updateItemQuantity(Number(target.dataset.id), -1);
+                    }
+                });
+
+                DOM.addCustomItemBtn.addEventListener('click', () => UI.toggleModal('addItemModal', true));
+                DOM.saveItemBtn.addEventListener('click', () => this.addCustomItem());
+                DOM.shareBtn.addEventListener('click', () => UI.toggleModal('shareModal', true));
+                DOM.mobileShare.addEventListener('click', (e) => { e.preventDefault(); UI.toggleModal('shareModal', true); });
+                DOM.modalCloses.forEach(btn => btn.addEventListener('click', (e) => e.target.closest('.modal').classList.remove('active')));
+                DOM.undoActionBtn.addEventListener('click', () => this.undoLastAction());
+                DOM.exportPdfBtn.addEventListener('click', () => this.exportStyledPDF());
+                DOM.exportTextBtn.addEventListener('click', () => this.exportAs('text'));
+                DOM.exportImgBtn.addEventListener('click', () => this.exportAs('image'));
+            }
+        };
+
+        // --- 6. INITIALIZE APP ---
+        APP.init();
+    });
     </script>
 </body>
 </html>
