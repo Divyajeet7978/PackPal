@@ -1,4 +1,4 @@
-# ✈️ PackPal - Smart Travel Packing Assistant
+# ✈️ PackPal - Smart Travel Packing Assistant [![Netlify Status](https://api.netlify.com/api/v1/badges/066a72ba-0589-4cec-87a3-07fd5467b27b/deploy-status)](https://app.netlify.com/projects/projectpackpal/deploys)
 
 **PackPal** is an AI-powered, responsive web app that helps travelers plan and optimize their packing based on destination, trip duration, airline baggage allowances, weather, currency info, and more. Built with intuitive UI, glassmorphism design, and interactive features like swiping, dragging, and real-time suggestions.
 
