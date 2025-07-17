@@ -1,0 +1,269 @@
+/* --- TABLE OF CONTENTS ---
+1.  Root Variables & Theming
+2.  Global Styles & Resets
+3.  Layout & Container
+4.  Header & Logo
+5.  Main Layout (Sidebar & Main Content)
+6.  Panels & Cards
+7.  Forms, Inputs & Buttons (including Searchable Dropdown)
+8.  Item Cards & Packing List (with Swipe Styles)
+9.  Widgets (Weight, Categories, Travel Info, Suitcase Animation)
+10. Modals & Notifications
+11. Mobile Navigation
+12. Helper & Animation Classes
+13. Media Queries (Responsive Design)
+--------------------------- */
+
+/* --- 1. Root Variables & Theming --- */
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --accent-color: #4895ef;
+    --danger-color: #f72585;
+    --warning-color: #f7b801;
+    --success-color: #4cc9f0;
+    --skip-color: #ff4d6d;
+    --pack-color: #80ed99;
+    --light-bg: #f4f7f9;
+    --dark-bg: #0d1117;
+    --text-light: #212529;
+    --text-dark: #e0e0e0;
+    --subtle-text-light: #495057;
+    --subtle-text-dark: #adb5bd;
+    --card-bg-light: #ffffff;
+    --card-bg-dark: #161b22;
+    --border-light: #e1e4e8;
+    --border-dark: #30363d;
+    --shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+    --transition-speed: 0.3s;
+}
+
+[data-theme="dark"] {
+    --primary-color: #4895ef;
+    --secondary-color: #4361ee;
+    --accent-color: #3f37c9;
+    --light-bg: #0d1117;
+    --dark-bg: #f4f7f9;
+    --text-light: #e0e0e0;
+    --text-dark: #212529;
+    --subtle-text-light: #adb5bd;
+    --subtle-text-dark: #6c757d;
+    --card-bg-light: #161b22;
+    --card-bg-dark: #ffffff;
+    --border-light: #30363d;
+    --border-dark: #e1e4e8;
+    --shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* --- 2. Global Styles & Resets --- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--light-bg);
+    color: var(--text-light);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* --- 3. Layout & Container --- */
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* --- 4. Header & Logo --- */
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.logo { font-size: 3rem; font-weight: bold; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+.header-actions { display: flex; gap: 15px; }
+
+/* --- 5. Main Layout --- */
+.main-layout { display: grid; grid-template-columns: 360px 1fr; gap: 20px; }
+.main-content, .sidebar {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: panel-in 0.5s ease-out forwards;
+}
+.main-content { animation-delay: 0.2s; }
+
+/* --- 6. Panels & Cards --- */
+.panel {
+    background: var(--card-bg-light);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    border: 1px solid var(--border-light);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed), transform var(--transition-speed);
+}
+.panel:hover { transform: translateY(-3px); }
+.panel-title { font-size: 1.1rem; margin-bottom: 20px; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+        
+/* --- 7. Forms, Inputs & Buttons --- */
+.form-group { margin-bottom: 15px; position: relative; }
+label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
+input, select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    background-color: var(--light-bg);
+    color: var(--text-light);
+    transition: all var(--transition-speed);
+}
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 25%, transparent);
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+button:hover { background-color: var(--secondary-color); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+button:active { transform: translateY(0); box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
+button:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-outline { background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
+#generateBtn { animation: pulse-glow 2s infinite; }
+        
+/* Searchable Dropdown */
+.autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg-light);
+    border: 1px solid var(--border-light);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: var(--shadow);
+}
+.autocomplete-item {
+    padding: 10px;
+    cursor: pointer;
+}
+.autocomplete-item:hover {
+    background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+}
+
+/* --- 8. Item Cards & Packing List --- */
+.item-card {
+    background: var(--card-bg-light);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    user-select: none;
+    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
+    position: relative;
+    border: 1px solid var(--border-light);
+    touch-action: none; /* Important for swipe gestures */
+}
+.item-card.dragging { cursor: grabbing; transition: none; }
+.item-card.swipe-right { transform: translateX(150%) rotate(15deg); opacity: 0; }
+.item-card.swipe-left { transform: translateX(-150%) rotate(-15deg); opacity: 0; }
+.item-card.swiping-right { background-color: color-mix(in srgb, var(--pack-color) 20%, transparent); }
+.item-card.swiping-left { background-color: color-mix(in srgb, var(--skip-color) 20%, transparent); }
+.item-icon { font-size: 24px; color: var(--primary-color); min-width: 30px; text-align: center; }
+.item-details { flex-grow: 1; }
+.item-name { font-weight: 600; }
+.item-meta { display: flex; gap: 10px; font-size: 12px; color: var(--subtle-text-light); font-weight: 500; }
+.item-category { background-color: var(--accent-color); color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+.swipe-hint {
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 15px;
+    animation: shimmer 3s infinite;
+}
+.quantity-controls { display: flex; align-items: center; gap: 10px; }
+.quantity-btn {
+    background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+    color: var(--primary-color);
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;
+    font-weight: bold;
+}
+.quantity-display { font-weight: bold; min-width: 15px; text-align: center; }
+
+/* --- 9. Widgets --- */
+.suitcase-widget { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+#suitcase-svg { width: 100px; height: auto; transition: transform 0.2s ease; }
+#suitcase-svg.full { animation: suitcase-jiggle 0.5s; }
+#suitcase-fill { fill: var(--suitcase-fill-color, var(--primary-color)); transition: transform 0.5s ease-out, fill 0.5s ease; transform-origin: bottom; transform: scaleY(0); }
+.weight-display { font-size: 1.2rem; font-weight: bold; text-align: center; }
+.categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 20px; }
+.category-card { background: color-mix(in srgb, var(--primary-color) 10%, transparent); border-radius: 10px; padding: 10px; text-align: center; transition: var(--transition-speed); }
+.category-card:hover { transform: translateY(-5px); background-color: color-mix(in srgb, var(--primary-color) 20%, transparent); }
+.category-icon { font-size: 24px; margin-bottom: 5px; color: var(--primary-color); }
+.category-count { font-weight: bold; font-size: 1rem; transition: color 0.3s; }
+.category-count.updated { animation: count-flip 0.5s; }
+.packed-items { margin-top: 20px; max-height: 200px; overflow-y: auto; padding-right: 5px; }
+.packed-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-light); }
+.info-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px; }
+.info-item i { color: var(--accent-color); font-size: 1.1rem; margin-top: 2px; }
+.info-item-content h4 { margin-bottom: 5px; font-size: 1rem; }
+.info-item-content p { font-size: 0.9rem; line-height: 1.5; color: var(--subtle-text-light); }
+.currency-widget { border-top: 1px solid var(--border-light); margin-top: 15px; padding-top: 15px; }
+.currency-widget p { font-weight: 500; }
+.currency-widget ul { list-style: none; padding-left: 0; font-size: 0.9rem; color: var(--subtle-text-light); font-weight: 500; }
+
+/* --- 10. Modals & Notifications --- */
+.modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.modal.active { opacity: 1; pointer-events: all; }
+.modal-content { background-color: var(--card-bg-light); padding: 25px; border-radius: 15px; max-width: 500px; width: 90%; box-shadow: var(--shadow); transform: scale(0.95) translateY(10px); transition: transform 0.3s ease, opacity 0.3s ease; }
+.modal.active .modal-content { transform: scale(1) translateY(0); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light); }
+.undo-notification { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(150%); background-color: var(--warning-color); color: #000; padding: 10px 20px; border-radius: 20px; display: flex; align-items: center; gap: 10px; z-index: 1000; transition: transform 0.3s ease; }
+.undo-notification.show { transform: translateX(-50%) translateY(0); }
+.undo-notification button { background: none; border: none; color: #000; font-weight: bold; cursor: pointer; }
+
+/* --- 11. Mobile Navigation --- */
+.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--card-bg-light); padding: 10px; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); z-index: 100; border-top: 1px solid var(--border-light); }
+.nav-buttons { display: flex; justify-content: space-around; }
+.nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: var(--text-light); text-decoration: none; }
+.nav-btn i { font-size: 18px; margin-bottom: 5px; }
+
+/* --- 12. Helper & Animation Classes --- */
+.hidden { display: none !important; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.spinner { border: 2px solid #f3f3f3; border-top: 2px solid var(--primary-color); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+.loading-message { display: flex; align-items: center; justify-content: center; gap: 10px; font-style: italic; color: #999; padding: 2rem; }
+@keyframes card-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.item-card-enter { animation: card-in 0.4s ease-out backwards; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse-glow { 0% { box-shadow: 0 0 5px color-mix(in srgb, var(--primary-color) 50%, transparent); } 50% { box-shadow: 0 0 20px color-mix(in srgb, var(--primary-color) 70%, transparent); } 100% { box-shadow: 0 0 5px color-mix(in srgb, var(--primary-color) 50%, transparent); } }
+@keyframes shimmer { 0% { background-position: -500px 0; } 100% { background-position: 500px 0; } }
+.swipe-hint { background: linear-gradient(to right, #999 40%, #fff 50%, #999 60%); background-size: 1000px 100%; color: transparent; -webkit-background-clip: text; background-clip: text; }
+@keyframes count-flip { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: rotateX(0deg); opacity: 1; } }
+@keyframes suitcase-jiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(3deg); } 75% { transform: rotate(-3deg); } }
+
+/* --- 13. Media Queries --- */
+@media (max-width: 992px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .sidebar { order: 2; }
+    .main-content { order: 1; }
+}
+@media (max-width: 768px) {
+    body { padding-bottom: 80px; }
+    .mobile-nav { display: block; }
+    .header-actions { display: none; }
+}
